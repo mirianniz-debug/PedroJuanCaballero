@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Geoportal - Pedro Juan Caballero - Paraguai</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<style>
+  :root{
+    --paper:#f4ecdc; --panel:#fbf6ea; --header-bg:#3c4a2c; --header-text:#f1ead3;
+    --brand:#7c9a4e; --brand-dark:#5c7735; --clay:#b9744a;
+    --ink:#3a2f22; --ink-soft:#71604a; --line:#e2d3b3; --line-strong:#cbb98d;
+    --font-body:'Nunito', -apple-system, sans-serif; --font-display:'Comfortaa','Nunito',sans-serif;
+    --accent:#b9744a; --accent-soft:#d8a67f;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;height:100%;font-family:var(--font-body);background:var(--paper);color:var(--ink);}
+  #app{display:flex;height:100vh;width:100vw;}
+  #map{flex:1;height:100%;background:#1a2015;position:relative;}
+  #panel{
+    width:360px; min-width:360px; background:var(--panel); border-left:1px solid var(--line-strong);
+    display:flex; flex-direction:column; height:100%; overflow:hidden;
+  }
+  #panel-header{
+    padding:18px 20px 14px; border-bottom:1px solid var(--line); background:var(--header-bg); color:var(--header-text);
+  }
+  #panel-header h1{font-family:var(--font-display); font-size:17px; margin:0 0 4px; color:var(--header-text); font-weight:700;}
+  #panel-header p{font-size:12px; color:var(--header-text); opacity:0.85; margin:0; line-height:1.45;}
+  #btn-row{display:flex; gap:8px; flex-wrap:wrap; margin-top:8px;}
+  .mini-btn{
+    background:none; border:1px solid rgba(241,234,211,.4); color:var(--header-text); font-size:11px;
+    padding:4px 10px; border-radius:20px; cursor:pointer; opacity:0.9;
+  }
+  .mini-btn:hover{background:rgba(241,234,211,.12);}
+  #help-box, #source-box{
+    display:none; background:rgba(255,255,255,.08); border-radius:8px; padding:10px 12px; margin-top:10px;
+    font-size:11.5px; line-height:1.55; color:var(--header-text); opacity:0.95;
+  }
+  #help-box.show, #source-box.show{display:block;}
+  #help-box b, #source-box b{color:#fff;}
+  #tabs{display:flex; border-bottom:1px solid var(--line); flex-shrink:0; background:var(--paper);}
+  .tab-btn{
+    flex:1; padding:11px 6px; background:none; border:none; color:var(--ink-soft);
+    font-size:12.5px; cursor:pointer; border-bottom:3px solid transparent; font-weight:700;
+    font-family:var(--font-body);
+  }
+  .tab-btn.active{color:var(--brand-dark); border-bottom-color:var(--accent);}
+  #panel-body{flex:1; overflow-y:auto; padding:14px 18px;}
+  .section-title{font-family:var(--font-display); font-size:11px; text-transform:uppercase; letter-spacing:.07em; color:var(--ink-soft); margin:14px 0 8px; font-weight:700;}
+  .search-box{
+    width:100%; padding:9px 12px; border-radius:9px; border:1px solid var(--line-strong);
+    background:#fff; color:var(--ink); font-size:13px; margin-bottom:10px; font-family:var(--font-body);
+  }
+  .search-box:focus{outline:none; border-color:var(--accent);}
+  .muni-item{
+    padding:10px 12px; border-radius:9px; margin-bottom:6px; cursor:pointer;
+    border:1px solid var(--line); background:#fff; transition:background .12s, border-color .12s, transform .08s;
+  }
+  .muni-item:hover{border-color:var(--accent-soft); transform:translateX(1px);}
+  .muni-item.selected{border-color:var(--accent); background:#f3e3d3; box-shadow:0 0 0 1px var(--accent) inset;}
+  .muni-item.featured{border-color:var(--clay);}
+  .muni-item .name{font-size:13px; font-weight:700; color:var(--ink);}
+  .muni-item .meta{font-size:11px; color:var(--ink-soft); margin-top:2px;}
+  .swatch{display:inline-block; width:10px; height:10px; border-radius:50%; margin-right:6px; vertical-align:middle;}
+  #legend{
+    position:absolute; bottom:16px; left:16px; background:rgba(251,246,234,.95); border:1px solid var(--line-strong);
+    border-radius:10px; padding:11px 15px; font-size:12px; color:var(--ink); z-index:500; max-width:270px;
+    font-family:var(--font-body); box-shadow:0 2px 10px rgba(0,0,0,.25);
+  }
+  #legend .row{display:flex; align-items:center; gap:7px; margin:3px 0;}
+  #legend .sw{width:14px; height:10px; border-radius:2px; flex-shrink:0;}
+  #legend .ln{width:14px; height:0; border-top:3px solid; flex-shrink:0;}
+  .clear-btn{
+    background:none; border:1px solid var(--line-strong); color:var(--ink-soft); font-size:11px;
+    padding:6px 12px; border-radius:20px; cursor:pointer; margin-bottom:10px; font-family:var(--font-body); font-weight:700;
+  }
+  .clear-btn:hover{border-color:var(--accent); color:var(--accent);}
+  .leaflet-popup-content-wrapper{background:var(--panel); color:var(--ink); border-radius:10px; font-family:var(--font-body);}
+  .leaflet-popup-tip{background:var(--panel);}
+  .popup-title{font-family:var(--font-display); font-weight:700; font-size:13px; margin-bottom:4px; color:var(--brand-dark);}
+  .popup-row{font-size:12px; color:var(--ink-soft); margin:2px 0;}
+  ::-webkit-scrollbar{width:8px;} ::-webkit-scrollbar-thumb{background:var(--line-strong); border-radius:4px;}
+  #basemap-toggle{
+    position:absolute; top:16px; right:16px; z-index:500; background:rgba(251,246,234,.95);
+    border:1px solid var(--line-strong); border-radius:20px; padding:4px; display:flex; gap:2px;
+    box-shadow:0 2px 10px rgba(0,0,0,.25); font-family:var(--font-body);
+  }
+  #basemap-toggle button{
+    border:none; background:none; padding:6px 12px; border-radius:16px; font-size:11.5px; cursor:pointer;
+    color:var(--ink-soft); font-weight:700;
+  }
+  #basemap-toggle button.active{background:var(--brand-dark); color:#fff;}
+  #logo-row{display:flex; align-items:center; gap:10px; margin-bottom:2px;}
+  #site-logo{width:34px; height:34px; flex-shrink:0; display:block;}
+  #logo-row h1{ margin:0; }
+  #map-credit{
+    padding:8px 20px; font-size:.72rem; color:var(--ink-soft); border-top:1px solid var(--line);
+    background:var(--panel); text-align:right; letter-spacing:.02em;
+  }
+  #loading{
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    background:var(--paper); color:var(--ink-soft); font-family:var(--font-display); font-size:13px; z-index:1000;
+  }
+  @media (max-width:800px){
+    #app{flex-direction:column;}
+    #panel{width:100%; min-width:0; height:48%; border-left:none; border-top:1px solid var(--line-strong);}
+    #map{height:52%;}
+  }
+</style>
+<link rel="icon" type="image/svg+xml" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><path d="M60 15 C90 15 105 45 100 70 C95 95 70 108 60 108 C50 108 25 95 20 70 C15 45 30 15 60 15 Z" fill="%233c4a2c"/><path d="M52 48 L52 84 L68 48 L68 84" fill="none" stroke="%23f1ead3" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>'>
+</head>
+<body>
+<div id="app">
+  <div id="map">
+    <div id="loading">Carregando mapa…</div>
+    <div id="basemap-toggle">
+      <button id="btn-sat" class="active">Satélite</button>
+      <button id="btn-light">Claro</button>
+    </div>
+    <div id="legend">
+      <div class="row"><span class="sw" style="background:#b9744acc;border:1px solid #3c4a2c;"></span>Pedro Juan Caballero / Yby Yaú</div>
+      <div class="row"><span class="sw" style="background:#d8c9a98c;border:1px solid #3c4a2c99;"></span>Demais municípios</div>
+      <div class="row"><span class="ln" style="border-color:#3c4a2c;"></span>Limite do país</div>
+      <div class="row"><span class="ln" style="border-color:#3a6f95;"></span>Rios principais</div>
+      <div class="row"><span class="ln" style="border-color:#5b8fae;"></span>Cursos d'água</div>
+      <div class="row"><span class="sw" style="background:#5b8fae8c;border:1px solid #3a6f95;"></span>Lagos e represas</div>
+    </div>
+  </div>
+  <div id="panel">
+    <div id="panel-header">
+      <div id="logo-row">
+        <svg id="site-logo" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Logo Mirian Niz"><path d="M60 15 C90 15 105 45 100 70 C95 95 70 108 60 108 C50 108 25 95 20 70 C15 45 30 15 60 15 Z" fill="none" stroke="var(--header-text)" stroke-width="4"/><path d="M52 48 L52 84 L68 48 L68 84" fill="none" stroke="var(--clay)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <h1>Pedro Juan Caballero · Paraguai</h1>
+      </div>
+      <p>Limites municipais e hidrografia — Departamento de Amambay. Clique num município na lista ou no mapa para destacá-lo.</p>
+      <div id="btn-row">
+        <button id="source-toggle" class="mini-btn" onclick="document.getElementById('source-box').classList.toggle('show')">Fonte de dados ⓘ</button>
+        <button id="help-toggle" class="mini-btn" onclick="document.getElementById('help-box').classList.toggle('show')">Como usar? ⓘ</button>
+      </div>
+      <div id="source-box">
+        <b>Fonte:</b> limites administrativos GADM 4.1 (níveis 0 e 2); hidrografia (rios principais, cursos d'água e lagos/represas) digitalizada a partir de base OpenStreetMap / Esri.<br>
+        <b>Tratamento:</b> dados sistematizados, espacializados e cartografados por Mirian Niz para fins de visualização geográfica.
+      </div>
+      <div id="help-box">
+        Use a busca ou a lista abaixo para localizar um município do Paraguai. Clique num item para dar zoom e destacá-lo no mapa. Clique num polígono no mapa para ver seus dados. Alterne entre imagem de satélite e mapa claro no canto superior direito.
+      </div>
+    </div>
+    <div id="tabs">
+      <button class="tab-btn active" data-tab="municipios">Municípios</button>
+      <button class="tab-btn" data-tab="sobre">Sobre o projeto</button>
+    </div>
+    <div id="panel-body">
+      <div id="tab-municipios">
+        <input id="search" class="search-box" type="text" placeholder="Buscar município…">
+        <button class="clear-btn" id="clear-selection">✕ Limpar seleção</button>
+        <div class="section-title" id="muni-count">Municípios</div>
+        <div id="muni-list"></div>
+      </div>
+      <div id="tab-sobre" style="display:none;">
+        <div class="section-title">Sobre</div>
+        <p style="font-size:12.5px; line-height:1.6; color:var(--ink-soft);">
+          Geoportal do município de Pedro Juan Caballero, capital do Departamento de Amambay, na fronteira com o Brasil
+          (Ponta Porã/MS). O mapa contextualiza o município dentro da divisão distrital do Paraguai e da rede hidrográfica
+          do país, incluindo os cursos d'água locais que cruzam a área urbana.
+        </p>
+        <p style="font-size:12.5px; line-height:1.6; color:var(--ink-soft);">
+          Município em destaque: <b>Pedro Juan Caballero</b> e <b>Yby Yaú</b>, distritos vizinhos na porção norte do
+          Departamento de Amambay.
+        </p>
+      </div>
+    </div>
+    <div id="map-credit">Elaboração cartográfica: Mirian Niz</div>
+  </div>
+</div>
+
+<script>
+// ============ MAP SETUP ============
+const map = L.map('map', {zoomControl: true}).setView([-23.4, -58.0], 6);
+
+const satLayer = L.layerGroup([
+  L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+    attribution: 'Tiles &copy; Esri', maxZoom: 19
+  }),
+  L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', {
+    maxZoom: 19, opacity: 0.85
+  })
+]);
+const lightLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+  attribution: '&copy; OpenStreetMap &copy; CARTO', subdomains: 'abcd', maxZoom: 19
+});
+
+satLayer.addTo(map);
+let currentBase = 'sat';
+
+document.getElementById('btn-sat').addEventListener('click', () => {
+  if(currentBase==='sat') return;
+  map.removeLayer(lightLayer); satLayer.addTo(map); currentBase='sat';
+  document.getElementById('btn-sat').classList.add('active');
+  document.getElementById('btn-light').classList.remove('active');
+});
+document.getElementById('btn-light').addEventListener('click', () => {
+  if(currentBase==='light') return;
+  map.removeLayer(satLayer); lightLayer.addTo(map); currentBase='light';
+  document.getElementById('btn-light').classList.add('active');
+  document.getElementById('btn-sat').classList.remove('active');
+});
+
+// ============ TABS ============
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-municipios').style.display = btn.dataset.tab === 'municipios' ? 'block' : 'none';
+    document.getElementById('tab-sobre').style.display = btn.dataset.tab === 'sobre' ? 'block' : 'none';
+  });
+});
+
+// ============ STYLES ============
+const FEATURED = ['Pedro Juan Caballero', 'Yby Yaú'];
+
+function municipioStyle(feature) {
+  const featured = FEATURED.includes(feature.properties.NAME_2);
+  return {
+    fillColor: featured ? '#b9744a' : '#d8c9a9',
+    fillOpacity: featured ? 0.75 : 0.55,
+    color: featured ? '#3c4a2c' : '#3c4a2c99',
+    weight: featured ? 1.4 : 0.8,
+  };
+}
+function limiteStyle() {
+  return { fill: false, color: '#3c4a2c', weight: 3.2, lineJoin: 'round' };
+}
+function riosStyle() {
+  return { color: '#3a6f95', weight: 2.4, lineCap: 'round', lineJoin: 'round' };
+}
+function cursosStyle() {
+  return { color: '#5b8fae', weight: 1.1, lineCap: 'round', lineJoin: 'round' };
+}
+function lagosStyle() {
+  return { fillColor: '#5b8fae', fillOpacity: 0.55, color: '#3a6f95', weight: 1 };
+}
+const selectedStyle = { color: '#b9744a', weight: 3, fillOpacity: 0.75 };
+
+// ============ LAYERS (loaded async) ============
+let municipiosLayer, limiteLayer, riosLayer, cursosLayer, lagosLayer;
+let allMuniFeatures = [];
+let selectedLayer = null;
+
+function fetchJSON(url) {
+  return fetch(url).then(r => { if(!r.ok) throw new Error(url + ' -> ' + r.status); return r.json(); });
+}
+
+Promise.all([
+  fetchJSON('data/limite.geojson'),
+  fetchJSON('data/municipios.geojson'),
+  fetchJSON('data/rios.geojson'),
+  fetchJSON('data/cursos_dagua.geojson'),
+  fetchJSON('data/lagos.geojson'),
+]).then(([limite, municipios, rios, cursos, lagos]) => {
+
+  limiteLayer = L.geoJSON(limite, { style: limiteStyle }).addTo(map);
+  cursosLayer = L.geoJSON(cursos, { style: cursosStyle }).addTo(map);
+  riosLayer = L.geoJSON(rios, { style: riosStyle }).addTo(map);
+  lagosLayer = L.geoJSON(lagos, { style: lagosStyle }).addTo(map);
+
+  municipiosLayer = L.geoJSON(municipios, {
+    style: municipioStyle,
+    onEachFeature: (feature, layer) => {
+      layer.on('click', () => selectMunicipio(feature.properties.NAME_2, layer));
+      layer.bindPopup(popupHTML(feature.properties));
+    }
+  }).addTo(map);
+
+  allMuniFeatures = municipios.features.slice().sort((a,b) => a.properties.NAME_2.localeCompare(b.properties.NAME_2));
+  renderMuniList(allMuniFeatures);
+
+  document.getElementById('loading').style.display = 'none';
+  map.fitBounds(limiteLayer.getBounds(), { padding: [20,20] });
+}).catch(err => {
+  document.getElementById('loading').textContent = 'Erro ao carregar dados: ' + err.message;
+  console.error(err);
+});
+
+function popupHTML(p) {
+  const featured = FEATURED.includes(p.NAME_2) ? ' <span style="color:#b9744a;">★</span>' : '';
+  return `<div class="popup-title">${p.NAME_2}${featured}</div>
+    <div class="popup-row"><b>Departamento:</b> ${p.NAME_1}</div>
+    <div class="popup-row"><b>Tipo:</b> ${p.TYPE_2 || '—'}</div>`;
+}
+
+function renderMuniList(features) {
+  const list = document.getElementById('muni-list');
+  document.getElementById('muni-count').textContent = features.length + ' município(s)';
+  list.innerHTML = '';
+  features.forEach(f => {
+    const p = f.properties;
+    const div = document.createElement('div');
+    const featured = FEATURED.includes(p.NAME_2);
+    div.className = 'muni-item' + (featured ? ' featured' : '');
+    div.innerHTML = `<span class="swatch" style="background:${featured ? '#b9744a' : '#d8c9a9'};border:1px solid #3c4a2c66;"></span>
+      <span class="name">${p.NAME_2}</span>
+      <div class="meta">${p.NAME_1}${featured ? ' · destaque do projeto' : ''}</div>`;
+    div.addEventListener('click', () => {
+      let target = null;
+      municipiosLayer.eachLayer(l => { if(l.feature.properties.NAME_2 === p.NAME_2 && l.feature.properties.GID_2 === p.GID_2) target = l; });
+      if(target) selectMunicipio(p.NAME_2, target, true);
+    });
+    list.appendChild(div);
+  });
+}
+
+function selectMunicipio(name, layer, fromList) {
+  if(selectedLayer) municipiosLayer.resetStyle(selectedLayer);
+  selectedLayer = layer;
+  layer.setStyle(selectedStyle);
+  layer.bringToFront();
+  map.fitBounds(layer.getBounds(), { padding: [40,40], maxZoom: 11 });
+  if(!fromList) layer.openPopup();
+  document.querySelectorAll('.muni-item').forEach(el => {
+    el.classList.toggle('selected', el.querySelector('.name').textContent === name);
+  });
+}
+
+document.getElementById('clear-selection').addEventListener('click', () => {
+  if(selectedLayer) { municipiosLayer.resetStyle(selectedLayer); selectedLayer = null; }
+  document.querySelectorAll('.muni-item').forEach(el => el.classList.remove('selected'));
+  document.getElementById('search').value = '';
+  renderMuniList(allMuniFeatures);
+  if(limiteLayer) map.fitBounds(limiteLayer.getBounds(), { padding: [20,20] });
+});
+
+document.getElementById('search').addEventListener('input', (e) => {
+  const q = e.target.value.trim().toLowerCase();
+  const filtered = q ? allMuniFeatures.filter(f => f.properties.NAME_2.toLowerCase().includes(q)) : allMuniFeatures;
+  renderMuniList(filtered);
+});
+</script>
+</body>
+</html>
