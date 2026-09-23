@@ -4,6 +4,8 @@ Geoportal interativo com informações territoriais do município de Pedro Juan 
 
 🔗 **Acesse ao vivo:** https://mirianniz-debug.github.io/PedroJuanCaballero/
 
+👤 **Parte do portfólio de:** https://mirianniz-debug.github.io/Portfolio/
+
 ## Sobre
 
 Mapa web para consulta espacial de dados territoriais do município, com camadas organizadas na pasta `data/`.
