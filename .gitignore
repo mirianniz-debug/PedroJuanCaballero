@@ -1,1 +1,19 @@
+# QGIS
+*.qgz~
+*.qgs~
+*.gpkg-journal
+*.gpkg-wal
+*.gpkg-shm
+*~
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor
+.vscode/
+*.swp
+
+# Cópia local do site antigo (fica só no computador)
 versao-anterior/
