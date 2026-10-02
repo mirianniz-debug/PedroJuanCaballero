@@ -3,340 +3,1321 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Geoportal - Pedro Juan Caballero - Paraguai</title>
+<title>Pedro Juan Caballero · Ponta Porã — Geoportal</title>
+<meta name="description" content="Geoportal particular de Mirian Niz sobre a cidade-gêmea Pedro Juan Caballero (Paraguay) e Ponta Porã (Brasil). Geoportal particular sobre la ciudad gemela.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<link rel="icon" type="image/svg+xml" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><path d="M60 15 C90 15 105 45 100 70 C95 95 70 108 60 108 C50 108 25 95 20 70 C15 45 30 15 60 15 Z" fill="%23F2F1E8" stroke="%233D5A45" stroke-width="4"/><path d="M52 48 L52 84 L68 48 L68 84" fill="none" stroke="%23B9744A" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>'>
 <style>
+  /* ============ CORES E FONTES (identidade Niz) ============ */
   :root{
-    --paper:#f4ecdc; --panel:#fbf6ea; --header-bg:#3c4a2c; --header-text:#f1ead3;
-    --brand:#7c9a4e; --brand-dark:#5c7735; --clay:#b9744a;
-    --ink:#3a2f22; --ink-soft:#71604a; --line:#e2d3b3; --line-strong:#cbb98d;
-    --font-body:'Nunito', -apple-system, sans-serif; --font-display:'Comfortaa','Nunito',sans-serif;
-    --accent:#b9744a; --accent-soft:#d8a67f;
+    --paper:#f2f1e8; --panel:#fbfaf3; --header-bg:#2f3d2b; --header-text:#f2f1e8;
+    --moss:#3e5a3a; --moss-2:#6e8b4e; --sage:#b9c4a3; --clay:#b9744a; --clay-soft:#d19468;
+    --water:#5e8583; --ink:#2e2a22; --ink-soft:#6a6252; --line:#e1dccb; --line-strong:#c9c2a8;
+    --py:#c4762f; --br:#0b7398; --card:#ffffff;
+    --font-display:'Young Serif', Georgia, serif; --font-body:'Hanken Grotesk', system-ui, sans-serif;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --paper:#171d16; --panel:#1d241c; --header-bg:#121811; --header-text:#e9e7da;
+      --moss:#a9c294; --moss-2:#8fae74; --sage:#56644b; --clay:#d8956a; --clay-soft:#e3ad86;
+      --water:#86aaa7; --ink:#ebe8dc; --ink-soft:#b3ad9a; --line:#2f3a2d; --line-strong:#43503f;
+      --py:#c4762f; --br:#1f8fb0; --card:#232b21;
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#171d16; --panel:#1d241c; --header-bg:#121811; --header-text:#e9e7da;
+    --moss:#a9c294; --moss-2:#8fae74; --sage:#56644b; --clay:#d8956a; --clay-soft:#e3ad86;
+    --water:#86aaa7; --ink:#ebe8dc; --ink-soft:#b3ad9a; --line:#2f3a2d; --line-strong:#43503f;
+    --py:#c4762f; --br:#1f8fb0; --card:#232b21;
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;height:100%;font-family:var(--font-body);background:var(--paper);color:var(--ink);}
-  #app{display:flex;height:100vh;width:100vw;}
+  #app{display:flex;height:100vh;height:100dvh;width:100%;}
   #map{flex:1;height:100%;background:#1a2015;position:relative;}
-  #panel{
-    width:360px; min-width:360px; background:var(--panel); border-left:1px solid var(--line-strong);
-    display:flex; flex-direction:column; height:100%; overflow:hidden;
-  }
-  #panel-header{
-    padding:18px 20px 14px; border-bottom:1px solid var(--line); background:var(--header-bg); color:var(--header-text);
-  }
-  #panel-header h1{font-family:var(--font-display); font-size:17px; margin:0 0 4px; color:var(--header-text); font-weight:700;}
-  #panel-header p{font-size:12px; color:var(--header-text); opacity:0.85; margin:0; line-height:1.45;}
-  #btn-row{display:flex; gap:8px; flex-wrap:wrap; margin-top:8px;}
-  .mini-btn{
-    background:none; border:1px solid rgba(241,234,211,.4); color:var(--header-text); font-size:11px;
-    padding:4px 10px; border-radius:20px; cursor:pointer; opacity:0.9;
-  }
-  .mini-btn:hover{background:rgba(241,234,211,.12);}
-  #help-box, #source-box{
-    display:none; background:rgba(255,255,255,.08); border-radius:8px; padding:10px 12px; margin-top:10px;
-    font-size:11.5px; line-height:1.55; color:var(--header-text); opacity:0.95;
-  }
-  #help-box.show, #source-box.show{display:block;}
-  #help-box b, #source-box b{color:#fff;}
-  #tabs{display:flex; border-bottom:1px solid var(--line); flex-shrink:0; background:var(--paper);}
-  .tab-btn{
-    flex:1; padding:11px 6px; background:none; border:none; color:var(--ink-soft);
-    font-size:12.5px; cursor:pointer; border-bottom:3px solid transparent; font-weight:700;
-    font-family:var(--font-body);
-  }
-  .tab-btn.active{color:var(--brand-dark); border-bottom-color:var(--accent);}
-  #panel-body{flex:1; overflow-y:auto; padding:14px 18px;}
-  .section-title{font-family:var(--font-display); font-size:11px; text-transform:uppercase; letter-spacing:.07em; color:var(--ink-soft); margin:14px 0 8px; font-weight:700;}
-  .search-box{
-    width:100%; padding:9px 12px; border-radius:9px; border:1px solid var(--line-strong);
-    background:#fff; color:var(--ink); font-size:13px; margin-bottom:10px; font-family:var(--font-body);
-  }
-  .search-box:focus{outline:none; border-color:var(--accent);}
-  .muni-item{
-    padding:10px 12px; border-radius:9px; margin-bottom:6px; cursor:pointer;
-    border:1px solid var(--line); background:#fff; transition:background .12s, border-color .12s, transform .08s;
-  }
-  .muni-item:hover{border-color:var(--accent-soft); transform:translateX(1px);}
-  .muni-item.selected{border-color:var(--accent); background:#f3e3d3; box-shadow:0 0 0 1px var(--accent) inset;}
-  .muni-item.featured{border-color:var(--clay);}
-  .muni-item .name{font-size:13px; font-weight:700; color:var(--ink);}
-  .muni-item .meta{font-size:11px; color:var(--ink-soft); margin-top:2px;}
-  .swatch{display:inline-block; width:10px; height:10px; border-radius:50%; margin-right:6px; vertical-align:middle;}
-  #legend{
-    position:absolute; bottom:16px; left:16px; background:rgba(251,246,234,.95); border:1px solid var(--line-strong);
-    border-radius:10px; padding:11px 15px; font-size:12px; color:var(--ink); z-index:500; max-width:270px;
-    font-family:var(--font-body); box-shadow:0 2px 10px rgba(0,0,0,.25);
-  }
-  #legend .row{display:flex; align-items:center; gap:7px; margin:3px 0;}
-  #legend .sw{width:14px; height:10px; border-radius:2px; flex-shrink:0;}
-  #legend .ln{width:14px; height:0; border-top:3px solid; flex-shrink:0;}
-  .clear-btn{
-    background:none; border:1px solid var(--line-strong); color:var(--ink-soft); font-size:11px;
-    padding:6px 12px; border-radius:20px; cursor:pointer; margin-bottom:10px; font-family:var(--font-body); font-weight:700;
-  }
-  .clear-btn:hover{border-color:var(--accent); color:var(--accent);}
-  .leaflet-popup-content-wrapper{background:var(--panel); color:var(--ink); border-radius:10px; font-family:var(--font-body);}
+
+  /* ============ PAINEL LATERAL ============ */
+  #panel{width:390px;min-width:390px;background:var(--panel);border-left:1px solid var(--line-strong);display:flex;flex-direction:column;height:100%;overflow:hidden;}
+  #panel-header{padding:18px 20px 14px;background:var(--header-bg);color:var(--header-text);}
+  #logo-row{display:flex;align-items:center;gap:12px;}
+  #site-logo{width:42px;height:42px;flex-shrink:0;}
+  #panel-header h1{font-family:var(--font-display);font-weight:400;font-size:19px;line-height:1.2;margin:0;}
+  #panel-header .sub{font-size:12.5px;opacity:.82;margin:3px 0 0;}
+  #btn-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:12px;}
+  .mini-btn{background:none;border:1px solid rgba(242,241,232,.35);color:var(--header-text);font:600 11.5px var(--font-body);padding:5px 11px;border-radius:20px;cursor:pointer;}
+  .mini-btn:hover,.mini-btn[aria-expanded="true"]{background:rgba(242,241,232,.12);}
+  .lang{margin-left:auto;display:flex;border:1px solid rgba(242,241,232,.35);border-radius:20px;overflow:hidden;}
+  .lang button{background:none;border:none;color:var(--header-text);font:700 11px var(--font-body);padding:5px 10px;cursor:pointer;opacity:.75;}
+  .lang button.active{background:var(--header-text);color:var(--header-bg);opacity:1;}
+  .info-box{display:none;background:rgba(255,255,255,.07);border-radius:10px;padding:11px 13px;margin-top:10px;font-size:12px;line-height:1.55;max-height:46vh;overflow:auto;}
+  .info-box.show{display:block;}
+  .info-box b{color:#fff;}
+  .info-box p{margin:0 0 7px;}
+  .info-box a{color:var(--clay-soft);}
+  #tabs{display:flex;border-bottom:1px solid var(--line);flex-shrink:0;background:var(--paper);}
+  .tab-btn{flex:1;padding:11px 4px;background:none;border:none;color:var(--ink-soft);font:600 12.5px var(--font-body);cursor:pointer;border-bottom:3px solid transparent;}
+  .tab-btn.active{color:var(--moss);border-bottom-color:var(--clay);}
+  .tab-btn .soon{display:block;font-size:9.5px;font-weight:500;opacity:.7;}
+  #panel-body{flex:1;overflow-y:auto;padding:16px 18px 24px;}
+  .tab-pane{display:none;} .tab-pane.active{display:block;}
+  h2{font-family:var(--font-display);font-weight:400;font-size:20px;line-height:1.25;margin:2px 0 8px;color:var(--ink);}
+  h3{font-family:var(--font-display);font-weight:400;font-size:15px;margin:20px 0 8px;color:var(--moss);}
+  .lead{font-size:13.5px;line-height:1.6;color:var(--ink-soft);margin:0 0 10px;}
+  .lead b{color:var(--ink);}
+  .note{font-size:11.5px;line-height:1.5;color:var(--ink-soft);background:var(--paper);border-left:3px solid var(--line-strong);padding:7px 10px;border-radius:0 8px 8px 0;margin:8px 0;}
+  .action-btn{display:inline-flex;align-items:center;gap:6px;background:var(--moss);color:var(--panel);border:none;font:600 12px var(--font-body);padding:8px 14px;border-radius:20px;cursor:pointer;margin:4px 6px 4px 0;}
+  .action-btn.ghost{background:none;color:var(--moss);border:1px solid var(--line-strong);}
+  .action-btn:hover{filter:brightness(1.08);}
+
+  /* comparação PY x BR (cada lado no seu idioma) */
+  .compare{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--card);}
+  .compare .row{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--line);}
+  .compare .row:first-child{border-top:none;}
+  .compare .cell{padding:8px 12px 9px;}
+  .compare .cell + .cell{border-left:1px solid var(--line);}
+  .compare .head .cell{font-family:var(--font-display);font-size:14px;}
+  .compare .head small{display:block;font-family:var(--font-body);font-size:10.5px;color:var(--ink-soft);}
+  .compare .head .py{color:var(--py);} .compare .head .br{color:var(--br);}
+  .compare .clbl{font-size:11px;color:var(--ink-soft);margin-bottom:1px;}
+  .compare .val{font-size:17px;font-weight:700;font-variant-numeric:tabular-nums;}
+  .compare .unit{font-size:11px;font-weight:500;color:var(--ink-soft);margin-left:3px;}
+  .bar{height:5px;border-radius:3px;background:var(--line);margin-top:5px;overflow:hidden;}
+  .bar span{display:block;height:100%;border-radius:3px;}
+  .src{font-size:10.5px;color:var(--ink-soft);margin-top:6px;line-height:1.45;}
+
+  /* lista de camadas = legenda */
+  .layer{display:flex;align-items:flex-start;gap:10px;padding:8px 4px;border-bottom:1px dashed var(--line);cursor:pointer;}
+  .layer input{margin:3px 0 0;accent-color:var(--moss);width:15px;height:15px;flex-shrink:0;cursor:pointer;}
+  .layer .txt{flex:1;}
+  .layer .name{font-size:13px;font-weight:600;}
+  .layer .meta{font-size:11px;color:var(--ink-soft);margin-top:1px;line-height:1.4;}
+  .key{display:flex;flex-wrap:wrap;gap:4px 10px;margin-top:4px;font-size:11px;color:var(--ink-soft);}
+  .key i{display:inline-block;width:12px;height:9px;border-radius:2px;margin-right:4px;vertical-align:-1px;}
+  .key i.ln{height:0;border-top:3px solid;border-radius:0;vertical-align:3px;}
+  .layer-group{border-bottom:1px dashed var(--line);}
+  .layer-group > .layer{border-bottom:none;}
+  .sublayers{padding:0 4px 8px 29px;display:grid;gap:2px;}
+  .sub{display:flex;align-items:center;gap:8px;font-size:12.5px;padding:4px 0;cursor:pointer;}
+  .sub input{accent-color:var(--moss);width:14px;height:14px;margin:0;cursor:pointer;}
+  .sub .dot{display:inline-block;width:10px;height:10px;border-radius:50%;border:1.5px solid #fff;box-shadow:0 0 0 1px var(--line-strong);flex-shrink:0;}
+  .sub .cnt{margin-left:auto;font-size:10.5px;color:var(--ink-soft);font-variant-numeric:tabular-nums;}
+
+  /* lista de territórios */
+  .search-box{width:100%;padding:9px 12px;border-radius:9px;border:1px solid var(--line-strong);background:var(--card);color:var(--ink);font:14px var(--font-body);margin-bottom:10px;}
+  .search-box:focus{outline:2px solid var(--clay);outline-offset:0;border-color:transparent;}
+  .t-item{padding:10px 12px;border-radius:10px;margin-bottom:6px;cursor:pointer;border:1px solid var(--line);background:var(--card);}
+  .t-item:hover{border-color:var(--clay-soft);}
+  .t-item.selected{border-color:var(--clay);box-shadow:0 0 0 1px var(--clay) inset;}
+  .t-item .name{font-size:13.5px;font-weight:700;}
+  .t-item .meta{font-size:11.5px;color:var(--ink-soft);margin-top:2px;}
+  .flag{display:inline-block;font-size:10px;font-weight:700;padding:1px 6px;border-radius:8px;color:#fff;margin-left:6px;vertical-align:1px;}
+  .flag.py{background:var(--py);} .flag.br{background:var(--br);}
+
+  .soon-box{border:1px dashed var(--line-strong);border-radius:12px;padding:16px;color:var(--ink-soft);font-size:13px;line-height:1.55;}
+
+  #map-credit{padding:8px 20px;font-size:11px;color:var(--ink-soft);border-top:1px solid var(--line);background:var(--panel);display:flex;justify-content:space-between;gap:10px;}
+  #theme-btn{background:none;border:none;color:var(--ink-soft);cursor:pointer;font:600 11px var(--font-body);padding:0;}
+
+  /* ============ CONTROLES SOBRE O MAPA ============ */
+  #basemap-toggle{position:absolute;top:12px;right:12px;z-index:500;background:var(--panel);border:1px solid var(--line-strong);border-radius:20px;padding:3px;display:flex;gap:2px;box-shadow:0 2px 10px rgba(0,0,0,.25);}
+  #basemap-toggle button{border:none;background:none;padding:6px 11px;border-radius:16px;font:600 11.5px var(--font-body);cursor:pointer;color:var(--ink-soft);}
+  #basemap-toggle button.active{background:var(--moss);color:var(--panel);}
+  #loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:var(--paper);color:var(--ink-soft);font-family:var(--font-display);font-size:15px;z-index:1000;}
+  .country-label{font-family:var(--font-display);font-size:22px;white-space:nowrap;text-shadow:0 0 4px #fff,0 0 10px #fff,0 0 2px #fff;pointer-events:none;}
+  .country-label.py{color:#8a4f2b;} .country-label.br{color:#0b5470;}
+  .leaflet-popup-content-wrapper{background:var(--panel);color:var(--ink);border-radius:12px;font-family:var(--font-body);}
   .leaflet-popup-tip{background:var(--panel);}
-  .popup-title{font-family:var(--font-display); font-weight:700; font-size:13px; margin-bottom:4px; color:var(--brand-dark);}
-  .popup-row{font-size:12px; color:var(--ink-soft); margin:2px 0;}
-  ::-webkit-scrollbar{width:8px;} ::-webkit-scrollbar-thumb{background:var(--line-strong); border-radius:4px;}
-  #basemap-toggle{
-    position:absolute; top:16px; right:16px; z-index:500; background:rgba(251,246,234,.95);
-    border:1px solid var(--line-strong); border-radius:20px; padding:4px; display:flex; gap:2px;
-    box-shadow:0 2px 10px rgba(0,0,0,.25); font-family:var(--font-body);
+  .leaflet-popup-content{margin:12px 14px;min-width:190px;}
+  .pp-title{font-family:var(--font-display);font-size:15px;margin-bottom:4px;color:var(--ink);}
+  .pp-row{font-size:12px;color:var(--ink-soft);margin:2px 0;}
+  .pp-row b{color:var(--ink);font-weight:600;}
+  .pp-src{font-size:10.5px;color:var(--ink-soft);margin-top:6px;border-top:1px solid var(--line);padding-top:5px;}
+  .leaflet-tooltip.road-tip{font:600 11px var(--font-body);}
+
+  /* cortina (swipe) */
+  #swipe-divider{position:absolute;top:0;bottom:0;width:0;z-index:450;display:none;}
+  #swipe-divider::before{content:"";position:absolute;top:0;bottom:0;left:-1.5px;width:3px;background:#fff;box-shadow:0 0 6px rgba(0,0,0,.5);}
+  #swipe-handle{position:absolute;top:50%;left:-21px;width:42px;height:42px;margin-top:-21px;border-radius:50%;background:var(--clay);color:#fff;border:3px solid #fff;display:flex;align-items:center;justify-content:center;font-size:17px;cursor:ew-resize;touch-action:none;box-shadow:0 2px 8px rgba(0,0,0,.4);user-select:none;}
+  .swipe-tag{position:absolute;bottom:30px;z-index:450;background:rgba(30,36,28,.82);color:#fff;font:600 11.5px var(--font-body);padding:4px 10px;border-radius:12px;display:none;pointer-events:none;}
+  #swipe-tag-l{left:12px;} #swipe-tag-r{right:12px;}
+  .swipe-on #swipe-divider,.swipe-on .swipe-tag{display:block;}
+  select.field{width:100%;padding:8px 10px;border-radius:9px;border:1px solid var(--line-strong);background:var(--card);color:var(--ink);font:13px var(--font-body);margin:4px 0 8px;}
+  .switch-row{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;margin:6px 0;}
+  .switch-row input{accent-color:var(--clay);width:16px;height:16px;}
+  .swipe-box{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:12px 12px 8px;}
+  .steps{margin:0 0 10px;padding-left:20px;font-size:12.5px;line-height:1.55;color:var(--ink-soft);}
+  .steps b{color:var(--ink);}
+  .two-sel{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+  .two-sel label{font-size:11.5px;color:var(--ink-soft);font-weight:600;}
+  .two-sel select{margin-top:3px;}
+
+  /* linha do tempo */
+  .year-box{display:flex;align-items:center;gap:12px;}
+  .play{width:44px;height:44px;border-radius:50%;border:none;background:var(--clay);color:#fff;font-size:16px;cursor:pointer;flex-shrink:0;}
+  .year-main{flex:1;min-width:0;}
+  .year{font-family:var(--font-display);font-size:30px;line-height:1;color:var(--ink);font-variant-numeric:tabular-nums;}
+  #ano{width:100%;accent-color:var(--clay);margin:6px 0 2px;}
+  .ramp{display:flex;align-items:center;gap:6px;font-size:10.5px;color:var(--ink-soft);}
+  .ramp i{flex:1;height:8px;border-radius:4px;}
+  .chart-legend{display:flex;gap:14px;font-size:12px;color:var(--ink-soft);margin-bottom:4px;}
+  .chart-legend i{display:inline-block;width:14px;height:3px;border-radius:2px;margin-right:6px;vertical-align:3px;}
+  .chart{position:relative;}
+  .chart svg{display:block;width:100%;height:auto;overflow:visible;}
+  .chart .grid{stroke:var(--line);stroke-width:1;}
+  .chart .axis{fill:var(--ink-soft);font:11px var(--font-body);}
+  .chart .end{fill:var(--ink);font:600 11px var(--font-body);}
+  .chart .cursor{stroke:var(--ink-soft);stroke-width:1;}
+  .chart-tip{position:absolute;pointer-events:none;background:var(--card);border:1px solid var(--line-strong);border-radius:8px;padding:6px 9px;font-size:11.5px;box-shadow:0 2px 8px rgba(0,0,0,.15);white-space:nowrap;display:none;color:var(--ink);}
+  .chart-tip i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;}
+  details.tbl{font-size:12px;margin:6px 0;}
+  details.tbl summary{cursor:pointer;color:var(--moss);font-weight:600;}
+  details.tbl table{border-collapse:collapse;width:100%;margin-top:6px;font-variant-numeric:tabular-nums;}
+  details.tbl th,details.tbl td{padding:3px 6px;border-bottom:1px solid var(--line);text-align:right;}
+  details.tbl th:first-child,details.tbl td:first-child{text-align:left;}
+
+  /* toques afetivos: bandeiras, ñandutí, costumes */
+  .flag-svg{display:inline-block;width:20px;height:14px;vertical-align:-2px;border-radius:2px;box-shadow:0 0 0 .5px rgba(0,0,0,.25);}
+  .flags{display:inline-flex;gap:4px;margin-left:8px;vertical-align:-1px;}
+  #panel-header{position:relative;overflow:hidden;}
+  #panel-header > *{position:relative;}
+  #panel-header .watermark{position:absolute;right:-46px;top:-42px;width:170px;height:170px;color:var(--header-text);opacity:.13;pointer-events:none;}
+  #loading .spin{animation:girar 9s linear infinite;color:var(--ink-soft);}
+  #loading .box{display:flex;flex-direction:column;align-items:center;gap:12px;}
+  @keyframes girar{to{transform:rotate(360deg);}}
+  @media (prefers-reduced-motion: reduce){ #loading .spin{animation:none;} }
+  .costumes{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px;}
+  .costumes .col{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 10px 6px;}
+  .costumes .col.py{border-top:3px solid var(--py);} .costumes .col.br{border-top:3px solid var(--br);}
+  .costumes .ch{font-family:var(--font-display);font-size:14px;display:flex;align-items:center;gap:6px;margin-bottom:6px;}
+  .costumes .item{display:grid;grid-template-columns:40px 1fr;gap:8px;align-items:center;padding:5px 0;border-top:1px dashed var(--line);}
+  .costumes .item:first-of-type{border-top:none;}
+  .costumes .item svg{width:40px;height:40px;color:var(--ink-soft);}
+  .costumes .nm{font-size:12.5px;font-weight:700;}
+  .costumes .ds{font-size:10.5px;color:var(--ink-soft);line-height:1.35;}
+  .costumes .cn{font-size:10.5px;color:var(--ink-soft);font-style:italic;margin:4px 0 2px;}
+  .sub .sd{display:block;font-size:10.5px;color:var(--ink-soft);font-weight:400;}
+  .sub .st{display:flex;flex-direction:column;}
+  .country-label .flag-svg{width:24px;height:16px;margin-right:6px;vertical-align:1px;}
+
+  /* memória e cultura */
+  .chips{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 12px;}
+  .chip{border:1px solid var(--line-strong);background:var(--card);color:var(--ink-soft);font:600 12px var(--font-body);padding:5px 11px;border-radius:16px;cursor:pointer;display:inline-flex;align-items:center;gap:5px;}
+  .chip svg{width:14px;height:14px;}
+  .chip.active{background:var(--moss);border-color:var(--moss);color:var(--panel);}
+  .mem-item{display:grid;grid-template-columns:56px 1fr;gap:10px;align-items:center;padding:8px;border:1px solid var(--line);border-radius:12px;background:var(--card);margin-bottom:8px;cursor:pointer;}
+  .mem-item:hover{border-color:var(--clay-soft);}
+  .mem-thumb{width:56px;height:56px;border-radius:10px;overflow:hidden;background:var(--paper);display:flex;align-items:center;justify-content:center;color:var(--ink-soft);}
+  .mem-thumb img{width:100%;height:100%;object-fit:cover;}
+  .mem-item .nm{font-size:13.5px;font-weight:700;line-height:1.3;}
+  .mem-item .mt{font-size:11.5px;color:var(--ink-soft);margin-top:2px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+  .tag-ex{font-size:10px;font-weight:700;color:var(--clay);border:1px dashed var(--clay);border-radius:8px;padding:0 6px;}
+  .mem-pin{width:32px;height:32px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:var(--c);border:2.5px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;}
+  .mem-pin svg{transform:rotate(45deg);width:17px;height:17px;}
+  .mem-pin.ex{border-style:dashed;}
+  .mem-popup .leaflet-popup-content-wrapper{padding:0;overflow:hidden;}
+  .mem-popup .leaflet-popup-content{margin:0;width:270px !important;}
+  .mem-popup .leaflet-popup-scrolled{border:none;}
+  .mem-photo{height:150px;background:var(--paper);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:var(--ink-soft);font-size:11.5px;position:relative;}
+  .mem-photo img{width:100%;height:100%;object-fit:cover;display:block;}
+  .mem-photo .tag-ex{position:absolute;top:10px;left:10px;background:var(--panel);}
+  .mem-body{padding:12px 14px 14px;}
+  .mem-chip{display:inline-flex;align-items:center;gap:5px;font:700 11px var(--font-body);color:#fff;background:var(--c);padding:3px 9px;border-radius:12px;}
+  .mem-chip svg{width:13px;height:13px;}
+  .mem-title{font-family:var(--font-display);font-size:17px;line-height:1.25;margin:8px 0 2px;color:var(--ink);}
+  .mem-ano{font-size:12px;color:var(--clay);font-weight:700;}
+  .mem-body p{font-size:13px;line-height:1.55;color:var(--ink-soft);margin:6px 0 0;}
+  .mem-cred{font-size:10.5px;color:var(--ink-soft);margin-top:6px;line-height:1.4;}
+  .mem-cred a{color:var(--moss);}
+
+  /* janelas sobre o mapa (números e costumes) */
+  .map-cards{position:absolute;left:12px;bottom:30px;z-index:520;display:flex;gap:8px;flex-wrap:wrap;}
+  .map-card-btn{position:relative;display:inline-flex;align-items:center;gap:7px;background:var(--panel);color:var(--ink);border:1px solid var(--line-strong);border-radius:22px;padding:6px 14px 6px 8px;font:700 12.5px var(--font-body);cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.28);}
+  .map-card-btn:hover,.map-card-btn[aria-expanded="true"]{border-color:var(--clay);}
+  .map-card-btn .mcb-ic{display:inline-flex;}
+  .map-card-btn .mcb-ic svg{width:26px;height:26px;}
+  .map-card-btn .pulse{position:absolute;top:-3px;right:-3px;width:11px;height:11px;border-radius:50%;background:var(--clay);border:2px solid var(--panel);}
+  .map-card-btn .pulse::after{content:"";position:absolute;inset:-2px;border-radius:50%;border:2px solid var(--clay);animation:pulsar 1.8s ease-out infinite;}
+  .map-card-btn.visto .pulse{display:none;}
+  @keyframes pulsar{from{transform:scale(1);opacity:.9;}to{transform:scale(2.6);opacity:0;}}
+  @media (prefers-reduced-motion: reduce){ .map-card-btn .pulse::after{animation:none;} }
+  .map-overlay{position:absolute;left:12px;bottom:78px;z-index:1100;width:380px;max-width:calc(100% - 24px);max-height:calc(100% - 100px);overflow:auto;background:var(--panel);color:var(--ink);border:1px solid var(--line-strong);border-radius:14px;padding:14px 16px 12px;box-shadow:0 8px 28px rgba(0,0,0,.35);}
+  .map-overlay[hidden]{display:none;}
+  .map-overlay h3{margin:0 28px 10px 0;}
+  .ov-close{position:absolute;top:8px;right:10px;border:none;background:none;font-size:22px;line-height:1;color:var(--ink-soft);cursor:pointer;padding:4px;}
+  .swipe-on .map-cards,.swipe-on .map-overlay{display:none;}
+  .cos-shared{background:var(--card);border:1px solid var(--line);border-top:3px solid var(--clay);border-radius:12px;padding:10px 10px 6px;margin-bottom:10px;}
+  .cos-shared .ch{font-family:var(--font-display);font-size:14px;display:flex;align-items:center;gap:6px;margin-bottom:4px;}
+  .cos-shared .itens{display:grid;grid-template-columns:1fr 1fr;gap:4px 10px;}
+  .cos-shared .item{display:grid;grid-template-columns:40px 1fr;gap:8px;align-items:center;padding:5px 0;}
+  .cos-shared .item svg{width:40px;height:40px;color:var(--ink-soft);}
+  .cos-shared .nm{font-size:12.5px;font-weight:700;} .cos-shared .ds{font-size:10.5px;color:var(--ink-soft);line-height:1.35;}
+  @media (max-width:820px){
+    .map-cards{bottom:44px;left:8px;}
+    .map-card-btn{padding:5px 11px 5px 6px;font-size:11.5px;}
+    .map-overlay{left:8px;right:8px;width:auto;max-width:none;bottom:auto;top:8px;max-height:calc(100% - 64px);padding:12px 12px 10px;}
+    .cos-shared .itens{grid-template-columns:1fr;}
   }
-  #basemap-toggle button{
-    border:none; background:none; padding:6px 12px; border-radius:16px; font-size:11.5px; cursor:pointer;
-    color:var(--ink-soft); font-weight:700;
-  }
-  #basemap-toggle button.active{background:var(--brand-dark); color:#fff;}
-  #logo-row{display:flex; align-items:center; gap:10px; margin-bottom:2px;}
-  #site-logo{width:34px; height:34px; flex-shrink:0; display:block;}
-  #logo-row h1{ margin:0; }
-  #map-credit{
-    padding:8px 20px; font-size:.72rem; color:var(--ink-soft); border-top:1px solid var(--line);
-    background:var(--panel); text-align:right; letter-spacing:.02em;
-  }
-  #loading{
-    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
-    background:var(--paper); color:var(--ink-soft); font-family:var(--font-display); font-size:13px; z-index:1000;
-  }
-  @media (max-width:800px){
+
+  ::-webkit-scrollbar{width:8px;} ::-webkit-scrollbar-thumb{background:var(--line-strong);border-radius:4px;}
+  :focus-visible{outline:2px solid var(--clay);outline-offset:2px;}
+
+  @media (max-width:820px){
     #app{flex-direction:column;}
-    #panel{width:100%; min-width:0; height:48%; border-left:none; border-top:1px solid var(--line-strong);}
-    #map{height:52%;}
+    #map{height:52%;flex:none;}
+    #panel{width:100%;min-width:0;flex:1;height:auto;border-left:none;border-top:1px solid var(--line-strong);}
+    #panel-header{padding:12px 16px 10px;}
+    #site-logo{width:34px;height:34px;}
+    #panel-header h1{font-size:16px;}
+    #panel-body{padding:14px 16px 20px;}
+    #basemap-toggle button{padding:5px 9px;font-size:11px;}
+    .country-label{font-size:17px;}
+    .swipe-tag{bottom:56px;}
+    .mem-popup .leaflet-popup-content{width:230px !important;}
+    .mem-photo{height:96px;}
+    .mem-photo svg{width:48px;height:48px;}
+    .mem-body{padding:10px 12px 12px;}
+    .mem-title{font-size:15px;}
+    .mem-body p{font-size:12.5px;}
   }
 </style>
-<link rel="icon" type="image/svg+xml" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><path d="M60 15 C90 15 105 45 100 70 C95 95 70 108 60 108 C50 108 25 95 20 70 C15 45 30 15 60 15 Z" fill="%233c4a2c"/><path d="M52 48 L52 84 L68 48 L68 84" fill="none" stroke="%23f1ead3" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>'>
 </head>
 <body>
 <div id="app">
   <div id="map">
-    <div id="loading">Carregando mapa…</div>
-    <div id="basemap-toggle">
-      <button id="btn-sat" class="active">Satélite</button>
-      <button id="btn-light">Claro</button>
+    <div id="loading"></div>
+    <div id="basemap-toggle" role="group" aria-label="Mapa">
+      <button data-base="sat" class="active" data-i18n="base_sat">Satélite</button>
+      <button data-base="ruas" data-i18n="base_ruas">Ruas</button>
     </div>
-    <div id="legend">
-      <div class="row"><span class="sw" style="background:#b9744acc;border:1px solid #3c4a2c;"></span>Pedro Juan Caballero / Yby Yaú</div>
-      <div class="row"><span class="sw" style="background:#d8c9a98c;border:1px solid #3c4a2c99;"></span>Demais municípios</div>
-      <div class="row"><span class="ln" style="border-color:#3c4a2c;"></span>Limite do país</div>
-      <div class="row"><span class="ln" style="border-color:#3a6f95;"></span>Rios principais</div>
-      <div class="row"><span class="ln" style="border-color:#5b8fae;"></span>Cursos d'água</div>
-      <div class="row"><span class="sw" style="background:#5b8fae8c;border:1px solid #3a6f95;"></span>Lagos e represas</div>
+    <div id="swipe-divider"><div id="swipe-handle" role="slider" tabindex="0" aria-label="⇆" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50">⇆</div></div>
+    <div class="swipe-tag" id="swipe-tag-l"></div>
+    <div class="swipe-tag" id="swipe-tag-r"></div>
+    <!-- janelas sobre o mapa: números e costumes -->
+    <div class="map-cards" id="map-cards">
+      <button class="map-card-btn" data-ov="ov-numeros"><span class="pulse" aria-hidden="true"></span><span class="mcb-ic" id="mcb-ic-num"></span><span data-i18n="btn_numeros"></span></button>
+      <button class="map-card-btn" data-ov="ov-costumes"><span class="pulse" aria-hidden="true"></span><span class="mcb-ic" id="mcb-ic-cos"></span><span data-i18n="btn_costumes"></span></button>
     </div>
+    <section class="map-overlay" id="ov-numeros" role="dialog" aria-labelledby="ov-numeros-t" hidden>
+      <button class="ov-close" aria-label="×">×</button>
+      <h3 id="ov-numeros-t" data-i18n="h_numeros"></h3>
+      <div class="compare" id="compare"></div>
+      <p class="src" data-i18n="compare_note"></p>
+    </section>
+    <section class="map-overlay" id="ov-costumes" role="dialog" aria-labelledby="ov-costumes-t" hidden>
+      <button class="ov-close" aria-label="×">×</button>
+      <h3 id="ov-costumes-t" data-i18n="h_costumes"></h3>
+      <div id="costumes"></div>
+    </section>
   </div>
-  <div id="panel">
-    <div id="panel-header">
+
+  <aside id="panel">
+    <header id="panel-header">
       <div id="logo-row">
-        <svg id="site-logo" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Logo Mirian Niz"><path d="M60 15 C90 15 105 45 100 70 C95 95 70 108 60 108 C50 108 25 95 20 70 C15 45 30 15 60 15 Z" fill="none" stroke="var(--header-text)" stroke-width="4"/><path d="M52 48 L52 84 L68 48 L68 84" fill="none" stroke="var(--clay)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        <h1>Pedro Juan Caballero · Paraguai</h1>
+        <svg id="site-logo" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Logo Mirian Niz">
+          <path d="M60 15 C90 15 105 45 100 70 C95 95 70 108 60 108 C50 108 25 95 20 70 C15 45 30 15 60 15 Z" stroke="currentColor" stroke-width="3.2"/>
+          <path d="M60 30 C80 30 90 50 87 68 C84 86 68 96 60 96 C52 96 36 86 33 68 C30 50 40 30 60 30 Z" stroke="currentColor" stroke-width="2.4" opacity=".6"/>
+          <path d="M52 48 L52 84 L68 48 L68 84" stroke="#d19468" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div>
+          <h1>Pedro Juan Caballero · Ponta Porã</h1>
+          <p class="sub"><span data-i18n="sub"></span><span class="flags" id="hdr-flags"></span></p>
+        </div>
       </div>
-      <p>Limites municipais e hidrografia — Departamento de Amambay. Clique num município na lista ou no mapa para destacá-lo.</p>
       <div id="btn-row">
-        <button id="source-toggle" class="mini-btn" onclick="document.getElementById('source-box').classList.toggle('show')">Fonte de dados ⓘ</button>
-        <button id="help-toggle" class="mini-btn" onclick="document.getElementById('help-box').classList.toggle('show')">Como usar? ⓘ</button>
+        <button class="mini-btn" data-box="help-box" aria-expanded="false" data-i18n="help_btn"></button>
+        <button class="mini-btn" data-box="source-box" aria-expanded="false" data-i18n="src_btn"></button>
+        <div class="lang" role="group" aria-label="Idioma">
+          <button data-lang="pt" title="Português">PT</button>
+          <button data-lang="es" title="Español">ES</button>
+        </div>
       </div>
-      <div id="source-box">
-        <b>Fonte:</b> limites administrativos GADM 4.1 (níveis 0 e 2); hidrografia (rios principais, cursos d'água e lagos/represas) digitalizada a partir de base OpenStreetMap / Esri.<br>
-        <b>Tratamento:</b> dados sistematizados, espacializados e cartografados por Mirian Niz para fins de visualização geográfica.
-      </div>
-      <div id="help-box">
-        Use a busca ou a lista abaixo para localizar um município do Paraguai. Clique num item para dar zoom e destacá-lo no mapa. Clique num polígono no mapa para ver seus dados. Alterne entre imagem de satélite e mapa claro no canto superior direito.
-      </div>
-    </div>
-    <div id="tabs">
-      <button class="tab-btn active" data-tab="municipios">Municípios</button>
-      <button class="tab-btn" data-tab="sobre">Sobre o projeto</button>
-    </div>
+      <div id="help-box" class="info-box" data-i18n="help_html"></div>
+      <div id="source-box" class="info-box" data-i18n="src_html"></div>
+    </header>
+
+    <nav id="tabs" role="tablist">
+      <button class="tab-btn active" data-tab="gemea" role="tab" data-i18n="tab_gemea"></button>
+      <button class="tab-btn" data-tab="tempo" role="tab" data-i18n="tab_tempo"></button>
+      <button class="tab-btn" data-tab="memoria" role="tab" data-i18n="tab_memoria"></button>
+      <button class="tab-btn" data-tab="territorios" role="tab" data-i18n="tab_terr"></button>
+    </nav>
+
     <div id="panel-body">
-      <div id="tab-municipios">
-        <input id="search" class="search-box" type="text" placeholder="Buscar município…">
-        <button class="clear-btn" id="clear-selection">✕ Limpar seleção</button>
-        <div class="section-title" id="muni-count">Municípios</div>
-        <div id="muni-list"></div>
-      </div>
-      <div id="tab-sobre" style="display:none;">
-        <div class="section-title">Sobre</div>
-        <p style="font-size:12.5px; line-height:1.6; color:var(--ink-soft);">
-          Geoportal do município de Pedro Juan Caballero, capital do Departamento de Amambay, na fronteira com o Brasil
-          (Ponta Porã/MS). O mapa contextualiza o município dentro da divisão distrital do Paraguai e da rede hidrográfica
-          do país, incluindo os cursos d'água locais que cruzam a área urbana.
-        </p>
-        <p style="font-size:12.5px; line-height:1.6; color:var(--ink-soft);">
-          Município em destaque: <b>Pedro Juan Caballero</b> e <b>Yby Yaú</b>, distritos vizinhos na porção norte do
-          Departamento de Amambay.
-        </p>
-      </div>
+      <!-- ===== CAPÍTULO 1: CIDADE-GÊMEA ===== -->
+      <section class="tab-pane active" id="tab-gemea">
+        <h2 data-i18n="g_title"></h2>
+        <p class="lead" id="g-lead"></p>
+        <button class="action-btn" id="go-border" data-i18n="go_border"></button>
+        <button class="action-btn ghost" id="go-region" data-i18n="go_region"></button>
+
+        <p class="src" style="margin-top:6px" data-i18n="g_hint"></p>
+
+        <h3 data-i18n="h_camadas"></h3>
+        <div id="layer-list"></div>
+        <div class="note" data-i18n="osm_note"></div>
+
+        <h3 data-i18n="h_cortina"></h3>
+        <div class="swipe-box" data-l="wb2007" data-r="sat">
+          <ol class="steps" data-i18n="sw_steps"></ol>
+          <div class="two-sel">
+            <label><span data-i18n="sw_left"></span><select class="field sw-l"></select></label>
+            <label><span data-i18n="sw_right"></span><select class="field sw-r"></select></label>
+          </div>
+          <button class="action-btn sw-go" data-i18n="sw_go"></button>
+          <button class="action-btn ghost sw-off" data-i18n="sw_off"></button>
+          <p class="src" data-i18n="sw_note"></p>
+        </div>
+      </section>
+
+      <!-- ===== CAPÍTULO 2: CRESCIMENTO ===== -->
+      <section class="tab-pane" id="tab-tempo">
+        <h2 data-i18n="t_title"></h2>
+        <p class="lead" id="tempo-lead"></p>
+
+        <p class="src" style="margin:0 0 10px">MapBiomas · 1985–2020 · 30 m</p>
+
+        <div class="year-box">
+          <button id="play" class="play">▶</button>
+          <div class="year-main">
+            <div class="year" id="ano-atual">—</div>
+            <input type="range" id="ano">
+            <div class="ramp"><span id="ramp-a"></span><i id="ramp-bar"></i><span id="ramp-b"></span></div>
+          </div>
+        </div>
+        <label class="switch-row"><input type="checkbox" id="mancha-on" checked> <span data-i18n="t_mancha"></span></label>
+        <p class="src" style="margin-top:0" data-i18n="t_ramp_note"></p>
+
+        <h3 data-i18n="t_chart_h"></h3>
+        <!-- legenda: cada lado no seu idioma -->
+        <div class="chart-legend" id="chart-legend"></div>
+        <div id="chart" class="chart"></div>
+        <details class="tbl"><summary data-i18n="t_table"></summary><div id="chart-table"></div></details>
+        <div class="note" id="metodo"></div>
+
+        <h3 data-i18n="t_fotos_h"></h3>
+        <p class="lead" style="font-size:13px" data-i18n="t_fotos_lead"></p>
+        <div class="swipe-box" data-l="wb2007" data-r="sat">
+          <ol class="steps" data-i18n="sw_steps"></ol>
+          <div class="two-sel">
+            <label><span data-i18n="sw_left"></span><select class="field sw-l"></select></label>
+            <label><span data-i18n="sw_right"></span><select class="field sw-r"></select></label>
+          </div>
+          <button class="action-btn sw-go" data-i18n="sw_go"></button>
+          <button class="action-btn ghost sw-off" data-i18n="sw_off"></button>
+          <p class="src" data-i18n="sw_note"></p>
+        </div>
+      </section>
+
+      <!-- ===== CAPÍTULO 3 (Etapa 3) ===== -->
+      <section class="tab-pane" id="tab-memoria">
+        <h2 data-i18n="m_title"></h2>
+        <p class="lead" data-i18n="m_lead"></p>
+        <div class="chips" id="mem-chips"></div>
+        <div id="mem-list"></div>
+        <p class="src" id="mem-aviso"></p>
+        <p class="src" data-i18n="m_note"></p>
+      </section>
+
+      <!-- ===== TERRITÓRIOS ===== -->
+      <section class="tab-pane" id="tab-territorios">
+        <h2 data-i18n="tr_title"></h2>
+        <p class="lead" data-i18n="tr_lead"></p>
+        <input id="search" class="search-box" type="search" data-i18n-ph="tr_search">
+        <div id="t-list"></div>
+        <p class="src" data-i18n="tr_note"></p>
+      </section>
     </div>
-    <div id="map-credit">Elaboração cartográfica: Mirian Niz</div>
-  </div>
+    <div id="map-credit"><span data-i18n="credit"></span><button id="theme-btn">◐ Tema</button></div>
+  </aside>
 </div>
 
 <script>
-// ============ MAP SETUP ============
-const map = L.map('map', {zoomControl: true}).setView([-23.4, -58.0], 6);
+// ============ TEXTOS EM PORTUGUÊS E ESPANHOL ============
+// Regra: textos gerais seguem o botão PT | ES.
+// Informações do lado paraguaio aparecem sempre em espanhol; do lado brasileiro, sempre em português.
+const T = {
+pt: {
+  loading:'Carregando…', err:'Erro ao carregar dados: ',
+  sub:'Uma cidade, dois países', help_btn:'Como usar?', src_btn:'Fonte de dados',
+  base_sat:'Satélite', base_ruas:'Ruas', ruas_nome:'Ruas (OpenStreetMap)',
+  help_html:`<p><b>Capítulos:</b> use as abas abaixo para navegar pela história da cidade.</p>
+    <p><b>Camadas:</b> marque ou desmarque cada camada na lista. As cores da lista são a legenda do mapa.</p>
+    <p><b>Clique</b> em qualquer área, ponto ou linha do mapa para ver os dados e a fonte.</p>
+    <p><b>Cortina:</b> escolha duas fotos de satélite, clique em Comparar e arraste o botão redondo ⇆ no mapa.</p>
+    <p><b>Linha do tempo:</b> na aba Crescimento, arraste o controle de ano ou aperte ▶ para ver a cidade crescer.</p>
+    <p><b>Memória:</b> na aba Memória, filtre por categoria e clique num lugar para abrir o cartão com foto, história e fonte.</p>
+    <p><b>Mapa de fundo:</b> troque entre satélite e ruas no canto superior direito.</p>
+    <p><b>Idioma:</b> PT | ES troca os textos gerais. As informações do lado paraguaio aparecem sempre em espanhol, e as do lado brasileiro em português.</p>`,
+  src_html:`<p><b>Geoportal particular</b> de Mirian Niz, para portfólio. Não é um site oficial e não tem vínculo com o INE (Paraguai), o IBGE (Brasil) ou qualquer prefeitura.</p>
+    <p><b>Distritos, departamento e área urbana do Paraguai:</b> INE Paraguai, <a href="https://www.ine.gov.py/microdatos/cartografia-digital-2022.php" target="_blank" rel="noopener">Cartografía Censal 2022</a>. Licença: <a href="https://www.ine.gov.py/microdatos/license.php" target="_blank" rel="noopener">Licencia de Uso de la Información Pública</a> (uso livre com citação).</p>
+    <p><b>População do Paraguai:</b> INE, Censo Nacional de Población y Viviendas 2022, Cuadros 1.14 e A16 (<a href="https://www.datos.gov.py/dataset/resultados-finales-del-censo-nacional-de-poblaci%C3%B3n-y-viviendas-2022" target="_blank" rel="noopener">datos.gov.py</a>).</p>
+    <p><b>Limite e população de Ponta Porã:</b> IBGE, API de Malhas Territoriais e Censo Demográfico 2022 (SIDRA, tabelas 9923 e 4714). <b>Área urbana do Brasil:</b> IBGE, Malha de Setores Censitários 2022 (situação urbana). Uso livre com citação da fonte.</p>
+    <p><b>Linha de fronteira:</b> trecho do limite do INE (Amambay) que coincide com a divisa do IBGE (MS). No trecho urbano, conferido com o OpenStreetMap: diferença mediana de 2 m.</p>
+    <p><b>Vias principais, áreas verdes, equipamentos e córregos urbanos:</b> © colaboradores do <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>, licença ODbL. Extraído em 02/10/2026.</p>
+    <p><b>Cursos d'água regionais:</b> digitalizados a partir de base OpenStreetMap / Esri (projeto QGIS da autora).</p>
+    <p><b>Contorno do Paraguai:</b> GADM 4.1 (uso não comercial).</p>
+    <p><b>Crescimento urbano (MapBiomas):</b> <a href="https://paraguay.mapbiomas.org/" target="_blank" rel="noopener">MapBiomas Paraguay</a>, Colección 2 (1985–2023) e <a href="https://brasil.mapbiomas.org/" target="_blank" rel="noopener">Projeto MapBiomas</a>, Coleção 11 (Brasil), 30 m. Licença CC BY 4.0. Acessados em 02/10/2026.</p>
+    <p><b>Fotos de satélite antigas:</b> <a href="https://livingatlas.arcgis.com/wayback/" target="_blank" rel="noopener">Esri World Imagery Wayback</a> (Esri, Maxar e outros), datas de captura pelos metadados da Esri.</p>
+    <p><b>Mapas de fundo:</b> Esri World Imagery (Esri, Maxar, Earthstar Geographics) e OpenStreetMap.</p>
+    <p><b>Lugares de memória:</b> cada fato traz sua fonte no cartão. Fotos do <a href="https://commons.wikimedia.org/" target="_blank" rel="noopener">Wikimedia Commons</a> (CC0, CC BY, CC BY-SA e domínio público) e de arquivo pessoal (Mirian Niz; Renato Dorta, com edição por IA), com crédito em cada cartão. Posições pelo OpenStreetMap.</p>
+    <p><b>Tratamento:</b> recorte, simplificação de geometria e cálculos de área (UTM 21S) por Mirian Niz.</p>`,
+  tab_gemea:'Cidade-gêmea', tab_tempo:'Crescimento', tab_memoria:'Memória', tab_terr:'Territórios',
+  g_title:'Uma rua separa dois países',
+  g_lead:'Pedro Juan Caballero (Paraguai) e Ponta Porã (Brasil) formam uma só mancha urbana. Dentro da cidade, a fronteira é chamada de “Linha”: são <b>{km}</b> que acompanham ruas e avenidas. O IBGE reconhece o conjunto como a <b>concentração urbana internacional</b> de Pedro Juan Caballero e Ponta Porã.',
+  go_border:'Ver a fronteira na cidade', go_region:'Ver a região',
+  h_numeros:'Os dois lados em números',
+  compare_note:'Censo 2022 de cada país (INE e IBGE). Área urbana oficial = soma dos bairros urbanos (INE) e dos setores urbanos (IBGE). Cada país define "urbano" do seu jeito, então compare com cuidado. A população é do distrito ou município inteiro, incluindo a área rural.',
+  h_camadas:'Camadas',
+  osm_note:'Os equipamentos e as áreas verdes vêm do OpenStreetMap, feito por voluntários. Cada lado foi mapeado de um jeito, então os números mostram <b>o que está no mapa</b>, não o que existe na cidade. Exemplo: no lado paraguaio, as comisarías de bairro foram cadastradas uma a uma (por isso há mais pontos de Segurança), enquanto muitas escolas e postos de saúde provavelmente ainda não estão no mapa.',
+  h_cortina:'Cortina: antes e depois',
+  sw_steps:'<li>Escolha a foto da <b>esquerda</b> e a da <b>direita</b>.</li><li>Clique em <b>Comparar</b>.</li><li>No mapa, arraste o botão redondo <b>⇆</b> para os lados.</li>',
+  sw_left:'Esquerda', sw_right:'Direita', sw_go:'Comparar', sw_off:'Desligar cortina',
+  sw_note:'Data da foto no centro da cidade, segundo a Esri. Outras partes do mapa podem ter fotos de outras datas.',
+  sw_cur:'Satélite atual', sw_foto:'Foto de', sw_same:'Escolha duas fotos diferentes.',
+  ly_fronteira:'Linha de fronteira', lym_fronteira:'Grossa no trecho urbano, tracejada no rural.', lyk_fronteira:'Fronteira',
+  ly_urbana:'Área urbana oficial', lym_urbana:'Segundo o censo de cada país (2022).',
+  ly_territorios:'Distritos e município', lym_territorios:'Limites do INE e do IBGE.', lyk_outros:'outros distritos',
+  ly_vias:'Vias principais', lym_vias:'OpenStreetMap. Passe o mouse para ver o nome.', lyk_vias:'Avenidas e rodovias',
+  ly_verdes:'Áreas verdes', lym_verdes:'OpenStreetMap. Matas a partir de 0,5 ha.',
+  ly_equip:'Equipamentos', lym_equip:'OpenStreetMap. Ligue cada tipo separadamente.',
+  ly_hidro:'Hidrografia', lym_hidro:'Córregos urbanos de perto; rede regional de longe.', lyk_hidro:'Rios e córregos',
+  fr_title:'Fronteira Paraguai · Brasil', fr_urb:'Trecho urbano: <b>{km}</b> com área urbana dos dois lados.', fr_rur:'Trecho rural da divisa entre Amambay e Mato Grosso do Sul.',
+  fr_src:'Fonte: limite INE (Amambay) coincidente com divisa IBGE (MS). Comprimento calculado.',
+  t_title:'A cidade cresceu dos dois lados',
+  t_lead:'Na janela de análise (retângulo tracejado, ~18 × 18 km em volta da cidade), a mancha urbana do lado paraguaio passou de <b>{py0} km²</b> em {a0} para <b>{py1} km²</b> em {a1}. A do lado brasileiro passou de <b>{br0}</b> para <b>{br1} km²</b>, segundo o {fonte}.',
+  t_mancha:'Mostrar mancha urbana no mapa',
+  t_ramp_note:'Cor mais escura = área que já era urbana há mais tempo. Contorno branco = o que entrou no ano escolhido.',
+  t_chart_h:'Área urbana na janela de análise', t_table:'Ver tabela', t_ano:'Ano',
+  t_fotos_h:'Fotos de satélite antigas',
+  t_fotos_lead:'O arquivo Esri Wayback guarda versões antigas do mapa de satélite. Sobre a cidade há 7 fotos diferentes, de 2007 a 2022.',
+  t_desde:'Urbano desde {ano}', t_play:'Animar linha do tempo', t_pause:'Pausar', t_chart_aria:'Área urbana em km² por ano',
+  met_mapbiomas:'<b>MapBiomas</b> (Paraguai Coleção 2 e Brasil Coleção 11): pixels de 30 m em "área não vegetada". O MapBiomas Paraguai não separa cidade de solo exposto. Por isso usei a mesma classe geral nos dois lados (no Brasil, quase toda ela é "área urbanizada"). Para tirar ruído de lavoura e estradas, o pixel só conta a partir do ano em que fica estável (80% dos anos seguintes), e foram removidas manchas menores que ~3 ha e faixas com menos de ~90 m de largura. Por essa regra, os anos 2021–2023 ainda não podem ser confirmados e ficaram de fora (o Paraguai só tem dados até 2023).',
+  m_title:'Memória e cultura', m_lead:'Lugares que contam a história e o dia a dia da fronteira: marcos, monumentos, natureza e memória. Clique em um ponto no mapa ou na lista para abrir o cartão.', m_all:'Todos',
+  m_note:'Fotos de licença livre do Wikimedia Commons e de arquivo pessoal, com crédito em cada cartão. Cada fato traz sua fonte. Lugares sem foto mostram o ñandutí.', m_exemplo:'Exemplo', m_foto_breve:'Foto em breve',
+  m_vazio:'Nenhum lugar nesta categoria.', m_err:'Não foi possível ler a planilha de lugares.', m_ignorados:'{n} linha(s) da planilha sem coordenadas válidas foram ignoradas.', m_foto_de:'Foto',
+  cat_historia:'História', cat_marco:'Marcos e monumentos', cat_natureza:'Natureza', cat_fe:'Fé', cat_movimento:'Movimento', cat_memoria:'Memória', m_fonte:'Fonte',
+  cat_infancia:'Infância', cat_praca:'Praça', cat_feira:'Feira', cat_escola:'Escola', cat_igreja:'Igreja', cat_outro:'Outro',
+  tr_title:'Amambay e Ponta Porã', tr_lead:'Os 6 distritos do Departamento de Amambay (INE, 2022) e o município de Ponta Porã (IBGE). Clique para ver no mapa.',
+  tr_search:'Buscar distrito ou município…',
+  tr_note:'Área dos distritos paraguaios calculada a partir do limite do INE (UTM 21S). A área de Ponta Porã é a área oficial do IBGE.',
+  credit:'Elaboração cartográfica: Mirian Niz · 2026',
+  // categorias (texto geral)
+  'Educação':'Educação','Saúde':'Saúde','Religião':'Religião','Segurança':'Segurança','Administração pública':'Administração pública','Comércio':'Comércio','Transporte':'Transporte','Cultura':'Cultura',
+  'Praça / parque':'Praça / parque','Esporte':'Esporte','Mata / vegetação':'Mata / vegetação','Gramado':'Gramado',
+  // o que cada categoria de equipamento inclui
+  'd_Educação':'escolas, faculdades e universidades', 'd_Saúde':'hospitais, clínicas e consultórios', 'd_Religião':'igrejas e templos de qualquer religião',
+  'd_Segurança':'delegacias, postos policiais e bombeiros', 'd_Administração pública':'prefeituras', 'd_Comércio':'shoppings e mercados', 'd_Transporte':'rodoviárias',
+  h_costumes:'Costumes da fronteira', cos_juntos:'Dos dois lados', btn_numeros:'Os dois lados em números', btn_costumes:'Costumes',
+  g_hint:'No canto do mapa, abra os quadros <b>Os dois lados em números</b> e <b>Costumes</b>.',
+  // tipo exato do ponto (lado brasileiro)
+  tp_school:'Escola', tp_college:'Faculdade', tp_university:'Universidade', tp_hospital:'Hospital', tp_clinic:'Clínica / posto de saúde', tp_doctors:'Consultório',
+  tp_place_of_worship:'Igreja / templo', tp_police:'Delegacia / posto policial', tp_fire_station:'Bombeiros', tp_townhall:'Prefeitura',
+  tp_marketplace:'Mercado', tp_mall:'Shopping', tp_bus_station:'Rodoviária',
+  // usados nas informações do lado brasileiro
+  s_pais:'Brasil', s_pop_total:'População total (2022)', s_pop_urb:'População urbana', s_area_urb:'Área urbana oficial',
+  s_dens:'Densidade urbana (calculada)', s_area_terr:'Área do território', s_pop22:'População 2022', s_urbana:'Urbana', s_rural:'Rural',
+  s_area:'Área', s_oficial:'(oficial)', s_calc:'(calculada)', s_fonte:'Fonte', s_censo:'IBGE, Censo 2022', s_urb_src:'IBGE, Setores Censitários 2022',
+  s_cat:'Categoria', s_tipo:'Tipo', s_sem_nome:'Sem nome no OSM', s_osm:'Fonte: © colaboradores do OpenStreetMap (ODbL)', s_hab:'hab.',
+},
+es: {
+  loading:'Cargando…', err:'Error al cargar datos: ',
+  sub:'Una ciudad, dos países', help_btn:'¿Cómo usar?', src_btn:'Fuente de datos',
+  base_sat:'Satélite', base_ruas:'Calles', ruas_nome:'Calles (OpenStreetMap)',
+  help_html:`<p><b>Capítulos:</b> use las pestañas para recorrer la historia de la ciudad.</p>
+    <p><b>Capas:</b> marque o desmarque cada capa en la lista. Los colores de la lista son la leyenda del mapa.</p>
+    <p><b>Haga clic</b> en cualquier área, punto o línea del mapa para ver los datos y la fuente.</p>
+    <p><b>Cortina:</b> elija dos fotos satelitales, haga clic en Comparar y arrastre el botón redondo ⇆ en el mapa.</p>
+    <p><b>Línea de tiempo:</b> en la pestaña Crecimiento, mueva el control de año o presione ▶ para ver crecer la ciudad.</p>
+    <p><b>Memoria:</b> en la pestaña Memoria, filtre por categoría y haga clic en un lugar para abrir la tarjeta con foto, historia y fuente.</p>
+    <p><b>Mapa de fondo:</b> cambie entre satélite y calles en la esquina superior derecha.</p>
+    <p><b>Idioma:</b> PT | ES cambia los textos generales. La información del lado paraguayo aparece siempre en español, y la del lado brasileño en portugués.</p>`,
+  src_html:`<p><b>Geoportal particular</b> de Mirian Niz, para portafolio. No es un sitio oficial y no tiene vínculo con el INE (Paraguay), el IBGE (Brasil) ni ninguna municipalidad.</p>
+    <p><b>Distritos, departamento y área urbana de Paraguay:</b> INE Paraguay, <a href="https://www.ine.gov.py/microdatos/cartografia-digital-2022.php" target="_blank" rel="noopener">Cartografía Censal 2022</a>. Licencia: <a href="https://www.ine.gov.py/microdatos/license.php" target="_blank" rel="noopener">Licencia de Uso de la Información Pública</a> (uso libre citando la fuente).</p>
+    <p><b>Población de Paraguay:</b> INE, Censo Nacional de Población y Viviendas 2022, Cuadros 1.14 y A16 (<a href="https://www.datos.gov.py/dataset/resultados-finales-del-censo-nacional-de-poblaci%C3%B3n-y-viviendas-2022" target="_blank" rel="noopener">datos.gov.py</a>).</p>
+    <p><b>Límite y población de Ponta Porã:</b> IBGE, API de Malhas Territoriais y Censo Demográfico 2022 (SIDRA, tablas 9923 y 4714). <b>Área urbana de Brasil:</b> IBGE, Malha de Setores Censitários 2022 (situación urbana). Uso libre citando la fuente.</p>
+    <p><b>Línea de frontera:</b> tramo del límite del INE (Amambay) que coincide con la divisa del IBGE (MS). En el tramo urbano, verificado con OpenStreetMap: diferencia mediana de 2 m.</p>
+    <p><b>Vías principales, áreas verdes, equipamientos y arroyos urbanos:</b> © colaboradores de <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>, licencia ODbL. Extraído el 02/10/2026.</p>
+    <p><b>Cursos de agua regionales:</b> digitalizados a partir de base OpenStreetMap / Esri (proyecto QGIS de la autora).</p>
+    <p><b>Contorno de Paraguay:</b> GADM 4.1 (uso no comercial).</p>
+    <p><b>Crecimiento urbano (MapBiomas):</b> <a href="https://paraguay.mapbiomas.org/" target="_blank" rel="noopener">MapBiomas Paraguay</a>, Colección 2 (1985–2023) y <a href="https://brasil.mapbiomas.org/" target="_blank" rel="noopener">Projeto MapBiomas</a>, Colección 11 (Brasil), 30 m. Licencia CC BY 4.0. Consultados el 02/10/2026.</p>
+    <p><b>Fotos satelitales antiguas:</b> <a href="https://livingatlas.arcgis.com/wayback/" target="_blank" rel="noopener">Esri World Imagery Wayback</a> (Esri, Maxar y otros), fechas de captura según los metadatos de Esri.</p>
+    <p><b>Mapas de fondo:</b> Esri World Imagery (Esri, Maxar, Earthstar Geographics) y OpenStreetMap.</p>
+    <p><b>Lugares de memoria:</b> cada dato trae su fuente en la tarjeta. Fotos de <a href="https://commons.wikimedia.org/" target="_blank" rel="noopener">Wikimedia Commons</a> (CC0, CC BY, CC BY-SA y dominio público) y de archivo personal (Mirian Niz; Renato Dorta, con edición por IA), con crédito en cada tarjeta. Ubicaciones según OpenStreetMap.</p>
+    <p><b>Procesamiento:</b> recorte, simplificación de geometría y cálculos de superficie (UTM 21S) por Mirian Niz.</p>`,
+  tab_gemea:'Ciudad gemela', tab_tempo:'Crecimiento', tab_memoria:'Memoria', tab_terr:'Territorios',
+  g_title:'Una calle separa dos países',
+  g_lead:'Pedro Juan Caballero (Paraguay) y Ponta Porã (Brasil) forman una sola mancha urbana. Dentro de la ciudad, la frontera se llama “la Línea”: son <b>{km}</b> que siguen calles y avenidas. El IBGE (Brasil) reconoce el conjunto como la <b>concentración urbana internacional</b> de Pedro Juan Caballero y Ponta Porã.',
+  go_border:'Ver la frontera en la ciudad', go_region:'Ver la región',
+  h_numeros:'Los dos lados en números',
+  compare_note:'Censo 2022 de cada país (INE e IBGE). Área urbana oficial = suma de los barrios urbanos (INE) y de los sectores urbanos (IBGE). Cada país define "urbano" a su manera, así que compare con cuidado. La población es del distrito o municipio entero, incluida el área rural.',
+  h_camadas:'Capas',
+  osm_note:'Los equipamientos y las áreas verdes vienen de OpenStreetMap, hecho por voluntarios. Cada lado fue mapeado de una forma, así que los números muestran <b>lo que está en el mapa</b>, no lo que existe en la ciudad. Ejemplo: en el lado paraguayo, las comisarías de barrio se cargaron una por una (por eso hay más puntos de Seguridad), mientras que muchas escuelas y puestos de salud probablemente todavía no están en el mapa.',
+  h_cortina:'Cortina: antes y después',
+  sw_steps:'<li>Elija la foto de la <b>izquierda</b> y la de la <b>derecha</b>.</li><li>Haga clic en <b>Comparar</b>.</li><li>En el mapa, arrastre el botón redondo <b>⇆</b> hacia los lados.</li>',
+  sw_left:'Izquierda', sw_right:'Derecha', sw_go:'Comparar', sw_off:'Apagar cortina',
+  sw_note:'Fecha de la foto en el centro de la ciudad, según Esri. Otras partes del mapa pueden tener fotos de otras fechas.',
+  sw_cur:'Satélite actual', sw_foto:'Foto de', sw_same:'Elija dos fotos diferentes.',
+  ly_fronteira:'Línea de frontera', lym_fronteira:'Gruesa en el tramo urbano, punteada en el rural.', lyk_fronteira:'Frontera',
+  ly_urbana:'Área urbana oficial', lym_urbana:'Según el censo de cada país (2022).',
+  ly_territorios:'Distritos y municipio', lym_territorios:'Límites del INE y del IBGE.', lyk_outros:'otros distritos',
+  ly_vias:'Vías principales', lym_vias:'OpenStreetMap. Pase el mouse para ver el nombre.', lyk_vias:'Avenidas y rutas',
+  ly_verdes:'Áreas verdes', lym_verdes:'OpenStreetMap. Bosques desde 0,5 ha.',
+  ly_equip:'Equipamientos', lym_equip:'OpenStreetMap. Active cada tipo por separado.',
+  ly_hidro:'Hidrografía', lym_hidro:'Arroyos urbanos de cerca; red regional de lejos.', lyk_hidro:'Ríos y arroyos',
+  fr_title:'Frontera Paraguay · Brasil', fr_urb:'Tramo urbano: <b>{km}</b> con área urbana de los dos lados.', fr_rur:'Tramo rural del límite entre Amambay y Mato Grosso do Sul.',
+  fr_src:'Fuente: límite del INE (Amambay) coincidente con la divisa del IBGE (MS). Longitud calculada.',
+  t_title:'La ciudad creció de los dos lados',
+  t_lead:'En la ventana de análisis (rectángulo punteado, ~18 × 18 km alrededor de la ciudad), la mancha urbana del lado paraguayo pasó de <b>{py0} km²</b> en {a0} a <b>{py1} km²</b> en {a1}. La del lado brasileño pasó de <b>{br0}</b> a <b>{br1} km²</b>, según {fonte}.',
+  t_mancha:'Mostrar mancha urbana en el mapa',
+  t_ramp_note:'Color más oscuro = área urbana desde hace más tiempo. Contorno blanco = lo que se sumó en el año elegido.',
+  t_chart_h:'Área urbana en la ventana de análisis', t_table:'Ver tabla', t_ano:'Año',
+  t_fotos_h:'Fotos satelitales antiguas',
+  t_fotos_lead:'El archivo Esri Wayback guarda versiones antiguas del mapa satelital. Sobre la ciudad hay 7 fotos diferentes, de 2007 a 2022.',
+  t_desde:'Urbano desde {ano}', t_play:'Animar línea de tiempo', t_pause:'Pausar', t_chart_aria:'Área urbana en km² por año',
+  met_mapbiomas:'<b>MapBiomas</b> (Paraguay Colección 2 y Brasil Colección 11): píxeles de 30 m en "área sin vegetación". MapBiomas Paraguay no separa ciudad de suelo expuesto. Por eso se usó la misma clase general en los dos lados (en Brasil, casi toda ella es "área urbanizada"). Para quitar ruido de cultivos y caminos, el píxel solo cuenta desde el año en que se vuelve estable (80% de los años siguientes), y se eliminaron manchas menores a ~3 ha y franjas de menos de ~90 m de ancho. Con esta regla, los años 2021–2023 todavía no pueden confirmarse y quedaron fuera (Paraguay solo tiene datos hasta 2023).',
+  m_title:'Memoria y cultura', m_lead:'Lugares que cuentan la historia y la vida diaria de la frontera: hitos, monumentos, naturaleza y memoria. Haga clic en un punto del mapa o de la lista para abrir la tarjeta.', m_all:'Todos',
+  m_note:'Fotos de licencia libre de Wikimedia Commons y de archivo personal, con crédito en cada tarjeta. Cada dato trae su fuente. Los lugares sin foto muestran el ñandutí.', m_exemplo:'Ejemplo', m_foto_breve:'Foto próximamente',
+  m_vazio:'Ningún lugar en esta categoría.', m_err:'No se pudo leer la planilla de lugares.', m_ignorados:'{n} fila(s) de la planilla sin coordenadas válidas fueron ignoradas.', m_foto_de:'Foto',
+  cat_historia:'Historia', cat_marco:'Hitos y monumentos', cat_natureza:'Naturaleza', cat_fe:'Fe', cat_movimento:'Movimiento', cat_memoria:'Memoria', m_fonte:'Fuente',
+  cat_infancia:'Infancia', cat_praca:'Plaza', cat_feira:'Feria', cat_escola:'Escuela', cat_igreja:'Iglesia', cat_outro:'Otro',
+  tr_title:'Amambay y Ponta Porã', tr_lead:'Los 6 distritos del Departamento de Amambay (INE, 2022) y el municipio de Ponta Porã (IBGE). Haga clic para verlos en el mapa.',
+  tr_search:'Buscar distrito o municipio…',
+  tr_note:'Superficie de los distritos paraguayos calculada a partir del límite del INE (UTM 21S). La superficie de Ponta Porã es la oficial del IBGE.',
+  credit:'Elaboración cartográfica: Mirian Niz · 2026',
+  'Educação':'Educación','Saúde':'Salud','Religião':'Religión','Segurança':'Seguridad','Administração pública':'Administración pública','Comércio':'Comercio','Transporte':'Transporte','Cultura':'Cultura',
+  'Praça / parque':'Plaza / parque','Esporte':'Deporte','Mata / vegetação':'Bosque / vegetación','Gramado':'Césped',
+  'd_Educação':'escuelas, institutos y universidades', 'd_Saúde':'hospitales, clínicas y consultorios', 'd_Religião':'iglesias y templos de cualquier religión',
+  'd_Segurança':'comisarías, puestos policiales y bomberos', 'd_Administração pública':'municipalidades', 'd_Comércio':'shoppings y mercados', 'd_Transporte':'terminales de ómnibus',
+  h_costumes:'Costumbres de la frontera', cos_juntos:'De los dos lados', btn_numeros:'Los dos lados en números', btn_costumes:'Costumbres',
+  g_hint:'En la esquina del mapa, abra los cuadros <b>Los dos lados en números</b> y <b>Costumbres</b>.',
+  // tipo exacto del punto (lado paraguayo)
+  tp_school:'Escuela', tp_college:'Instituto superior', tp_university:'Universidad', tp_hospital:'Hospital', tp_clinic:'Clínica / puesto de salud', tp_doctors:'Consultorio',
+  tp_place_of_worship:'Iglesia / templo', tp_police:'Comisaría / puesto policial', tp_fire_station:'Bomberos', tp_townhall:'Municipalidad',
+  tp_marketplace:'Mercado', tp_mall:'Shopping', tp_bus_station:'Terminal de ómnibus',
+  // usados nas informações do lado paraguaio
+  s_pais:'Paraguay', s_pop_total:'Población total (2022)', s_pop_urb:'Población urbana', s_area_urb:'Área urbana oficial',
+  s_dens:'Densidad urbana (calculada)', s_area_terr:'Superficie del territorio', s_pop22:'Población 2022', s_urbana:'Urbana', s_rural:'Rural',
+  s_area:'Superficie', s_oficial:'(oficial)', s_calc:'(calculada)', s_fonte:'Fuente', s_censo:'INE Paraguay, Censo 2022', s_urb_src:'INE Paraguay, Cartografía Censal 2022',
+  s_cat:'Categoría', s_tipo:'Tipo', s_sem_nome:'Sin nombre en OSM', s_osm:'Fuente: © colaboradores de OpenStreetMap (ODbL)', s_hab:'hab.',
+}};
+let LANG = 'pt';
+try { LANG = localStorage.getItem('pjc-lang') || ((navigator.language || '').startsWith('es') ? 'es' : 'pt'); } catch(e){}
+// texto geral (segue o botão PT | ES)
+const t = (k, vars) => { let s = T[LANG][k] ?? T.pt[k] ?? k; if(vars) for(const [a, b] of Object.entries(vars)) s = s.split('{' + a + '}').join(b); return s; };
+// texto de um lado (PY sempre em espanhol, BR sempre em português)
+const ts = (pais, k) => T[pais === 'PY' ? 'es' : 'pt'][k] ?? k;
 
-const satLayer = L.layerGroup([
-  L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-    attribution: 'Tiles &copy; Esri', maxZoom: 19
-  }),
-  L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', {
-    maxZoom: 19, opacity: 0.85
-  })
-]);
-const lightLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-  attribution: '&copy; OpenStreetMap &copy; CARTO', subdomains: 'abcd', maxZoom: 19
-});
+// ============ AJUDANTES ============
+const fmt = n => n.toLocaleString('pt-BR');
+const fmt1 = n => n.toLocaleString('pt-BR', {minimumFractionDigits:1, maximumFractionDigits:1});
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const COR = {PY:'#c4762f', BR:'#0b7398'};
 
-satLayer.addTo(map);
-let currentBase = 'sat';
+// ============ TOQUES AFETIVOS: BANDEIRAS, ÑANDUTÍ E COSTUMES ============
+const FLAG = {
+  PY: `<svg class="flag-svg" viewBox="0 0 30 20" role="img" aria-label="Paraguay"><rect width="30" height="20" fill="#fff"/><rect width="30" height="6.7" fill="#d52b1e"/><rect y="13.3" width="30" height="6.7" fill="#0038a8"/><circle cx="15" cy="10" r="2.6" fill="none" stroke="#3e7b2f" stroke-width=".7"/><circle cx="15" cy="10" r="1.1" fill="#f2c200"/></svg>`,
+  BR: `<svg class="flag-svg" viewBox="0 0 30 20" role="img" aria-label="Brasil"><rect width="30" height="20" fill="#009c3b"/><path d="M15 2.6 27 10 15 17.4 3 10z" fill="#ffdf00"/><circle cx="15" cy="10" r="4.2" fill="#002776"/><path d="M11.1 9.1q4-1.4 7.8 1.6" stroke="#fff" stroke-width=".8" fill="none"/></svg>`,
+};
+// Ñandutí: renda paraguaia em forma de teia (desenhada por código, sempre simétrica)
+function nanduti(size, cls = ''){
+  const c = 24, P = (r, a) => `${(c + r * Math.cos(a)).toFixed(2)} ${(c + r * Math.sin(a)).toFixed(2)}`;
+  let s = `<svg class="${cls}" viewBox="0 0 48 48" width="${size}" height="${size}" aria-hidden="true">`;
+  for(let i = 0; i < 24; i++) s += `<path d="M${P(3, i * Math.PI / 12)} L${P(22, i * Math.PI / 12)}" stroke="currentColor" stroke-width=".45" opacity=".6"/>`;
+  [[22, '#c4762f', 1.3], [15, '#3e5a3a', 1], [8, '#c08a3e', 1]].forEach(([r, cor, w]) => s += `<circle cx="24" cy="24" r="${r}" fill="none" stroke="${cor}" stroke-width="${w}"/>`);
+  for(let i = 0; i < 12; i++){ const a = i * Math.PI / 6, d = Math.PI / 12; s += `<path d="M${P(8, a - d)} Q${P(17, a)} ${P(8, a + d)}" fill="none" stroke="#0b7398" stroke-width="1"/>`; }
+  for(let i = 0; i < 16; i++){ const a = i * Math.PI / 8, d = Math.PI / 16; s += `<path d="M${P(15, a - d)} Q${P(23.5, a)} ${P(15, a + d)}" fill="none" stroke="#d52b1e" stroke-width=".9"/>`; }
+  return s + `<circle cx="24" cy="24" r="3" fill="#c08a3e"/><circle cx="24" cy="24" r="1.2" fill="#d52b1e"/></svg>`;
+}
+const ICON = {
+  terere: `<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M31 3 25 27" stroke="#a9a9a9" stroke-width="2.2" stroke-linecap="round"/><path d="M29.6 3.2h3" stroke="#a9a9a9" stroke-width="2.6" stroke-linecap="round"/><path d="M13 19h22l-3.2 22.5q-7.8 3-15.6 0z" fill="#9a6a3c"/><path d="M14.2 27.5h19.6M15.3 35h17.4" stroke="#6e4524" stroke-width="1.6"/><ellipse cx="24" cy="19" rx="11" ry="3" fill="#6e8b4e"/><rect x="15.5" y="13.5" width="6" height="6" rx="1.2" transform="rotate(-14 18.5 16.5)" fill="#d8eef4" stroke="#9cc7d4" stroke-width=".8"/><rect x="24" y="14" width="5.5" height="5.5" rx="1.2" transform="rotate(12 26.7 16.7)" fill="#d8eef4" stroke="#9cc7d4" stroke-width=".8"/><path d="M33 16q6-6 9 0-5 3-9 0z" fill="#5d8a3a"/></svg>`,
+  chipa: `<svg viewBox="0 0 48 48" aria-hidden="true"><path fill-rule="evenodd" d="M24 8a16 16 0 1 1 0 32a16 16 0 1 1 0-32zm0 9a7 7 0 1 0 0 14a7 7 0 1 0 0-14z" fill="#e3a94f" stroke="#b9772c" stroke-width="1.5"/><g fill="#b9772c"><circle cx="15" cy="17" r="1.3"/><circle cx="32" cy="14" r="1.1"/><circle cx="35" cy="29" r="1.4"/><circle cx="20" cy="35" r="1.2"/><circle cx="12" cy="27" r="1"/></g><path d="M14 14q4-4 9-5" stroke="#f6d68f" stroke-width="2" fill="none" stroke-linecap="round"/></svg>`,
+  nanduti: nanduti(48),
+  traje: `<svg viewBox="0 0 48 48" aria-hidden="true"><rect x="21.6" y="1.5" width="4.8" height="7.5" rx="1.2" fill="#3f7a3a"/><rect x="22.9" y="0" width="2.2" height="2.6" fill="#2f5a2a"/><circle cx="24" cy="12.6" r="4" fill="#b98258"/><path d="M20.2 11.6q3.8-5 7.6 0" fill="#3a2a1e"/><path d="M16 19q8-3 16 0l-2 7H18z" fill="#fff" stroke="#d6cdb8" stroke-width=".6"/><path d="M19 21.5h10" stroke="#c4762f" stroke-width=".8" stroke-dasharray="1 1.2"/><path d="M18 26h12l12 17q-18 5-36 0z" fill="#d52b1e"/><path d="M14.6 31h18.8M11.2 36h25.6M7.8 40.8h32.4" stroke="#f2c200" stroke-width="1.6"/><path d="M12.9 33.5h22.2M9.4 38.4h29.2" stroke="#0038a8" stroke-width="1.2"/></svg>`,
+  chimarrao: `<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M30 2 26 22" stroke="#b5b5b5" stroke-width="2.2" stroke-linecap="round"/><path d="M28.6 2.2h3" stroke="#b5b5b5" stroke-width="2.6" stroke-linecap="round"/><path d="M12 20q-3 13 4 19 8 6 16 0 7-6 4-19z" fill="#7a5230"/><path d="M14.5 33q9.5 4 19 0" stroke="#5a3a1e" stroke-width="1.4" fill="none"/><ellipse cx="24" cy="20" rx="12" ry="3.4" fill="#cfcfcf"/><ellipse cx="24" cy="20" rx="10.2" ry="2.5" fill="#7fa04a"/><path d="M36.5 12q2-3 0-6M40.5 14q2-3 0-6" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linecap="round" opacity=".7"/></svg>`,
+  ctg: `<svg viewBox="0 0 48 48" aria-hidden="true"><ellipse cx="24" cy="22" rx="20" ry="4.5" fill="#4a3424"/><path d="M14 21q0-11 10-11t10 11q-10 3-20 0z" fill="#5c4130"/><path d="M14.6 18.5q9.4 2.6 18.8 0" stroke="#2e2015" stroke-width="2"/><path d="M16 30h16l-8 13z" fill="#b8352b"/><path d="M21.5 30h5l-2.5 4.5z" fill="#8e261e"/></svg>`,
+  churrasco: `<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M6 38 42 8" stroke="#a9a9a9" stroke-width="2" stroke-linecap="round"/><g fill="#8a3b22" stroke="#5e2414" stroke-width=".8"><rect x="12" y="25" width="9" height="8" rx="2.5" transform="rotate(-40 16.5 29)"/><rect x="20" y="18.5" width="9" height="8" rx="2.5" transform="rotate(-40 24.5 22.5)"/><rect x="28" y="12" width="9" height="8" rx="2.5" transform="rotate(-40 32.5 16)"/></g><path d="M14 46q-3-5 1-9 0 3 2 4 1-4 4-6-1 5 2 7 2-2 1-5 4 4 1 9z" fill="#e8933a"/></svg>`,
+};
+// Tereré e mate/chimarrão: tomados dos dois lados (texto geral, segue o botão PT | ES)
+const COSTUMES_JUNTOS = [
+  {icon:'terere', nm:{pt:'Tereré', es:'Tereré'},
+   ds:{pt:'Erva-mate com água gelada, tomado dos dois lados da fronteira. No Paraguai, costuma levar yuyos (ervas).', es:'Yerba mate con agua fría, se toma de los dos lados de la frontera. En Paraguay suele llevar yuyos.'}},
+  {icon:'chimarrao', nm:{pt:'Chimarrão / Mate', es:'Mate / Chimarrão'},
+   ds:{pt:'Erva-mate com água quente, na cuia. No Brasil se diz chimarrão; no Paraguai, mate. Também se toma dos dois lados.', es:'Yerba mate con agua caliente. En Brasil se dice chimarrão; en Paraguay, mate. También se toma de los dos lados.'}},
+];
+// costumes de cada lado, cada um no seu idioma
+const COSTUMES = {
+  PY: {nome:'Paraguay', itens:[
+    {icon:'chipa', nm:'Chipa', ds:'Pan de almidón de mandioca, queso y huevo.'},
+    {icon:'nanduti', nm:'Ñandutí', ds:'Encaje tradicional; en guaraní, «tela de araña».'},
+    {icon:'traje', nm:'Traje típico', ds:'Blusa de ao po\'i y falda amplia, como en la danza de la botella.'}]},
+  BR: {nome:'Brasil', nota:'Muitos costumes vêm do Sul do Brasil.', itens:[
+    {icon:'churrasco', nm:'Churrasco', ds:'Carne assada no espeto, do jeito gaúcho.'},
+    {icon:'ctg', nm:'Centro de Tradições Gaúchas', ds:'Em Ponta Porã, o CTG Querência da Saudade reúne bailes, costelão e grupos tradicionalistas.'}]},
+};
+function buildCostumes(){
+  const juntos = `<div class="cos-shared"><div class="ch">${FLAG.PY}${FLAG.BR} ${t('cos_juntos')}</div><div class="itens">
+    ${COSTUMES_JUNTOS.map(i => `<div class="item">${ICON[i.icon]}<div><div class="nm">${i.nm[LANG]}</div><div class="ds">${i.ds[LANG]}</div></div></div>`).join('')}</div></div>`;
+  const lados = `<div class="costumes">` + ['PY', 'BR'].map(k => { const c = COSTUMES[k];
+    return `<div class="col ${k.toLowerCase()}" lang="${k === 'PY' ? 'es' : 'pt-BR'}"><div class="ch">${FLAG[k]} ${c.nome}</div>
+      ${c.nota ? `<div class="cn">${c.nota}</div>` : ''}
+      ${c.itens.map(i => `<div class="item">${ICON[i.icon]}<div><div class="nm">${i.nm}</div><div class="ds">${i.ds}</div></div></div>`).join('')}</div>`; }).join('') + `</div>`;
+  document.getElementById('costumes').innerHTML = juntos + lados;
+}
+document.getElementById('hdr-flags').innerHTML = FLAG.PY + FLAG.BR;
+document.getElementById('panel-header').insertAdjacentHTML('afterbegin', nanduti(170, 'watermark'));
+document.getElementById('mcb-ic-num').innerHTML = `<svg viewBox="0 0 30 26" aria-hidden="true"><g transform="translate(0,0) scale(.62)">${FLAG.PY.replace(/<\/?svg[^>]*>/g, '')}</g><g transform="translate(11,13) scale(.62)">${FLAG.BR.replace(/<\/?svg[^>]*>/g, '')}</g></svg>`;
+document.getElementById('mcb-ic-cos').innerHTML = ICON.terere;
 
-document.getElementById('btn-sat').addEventListener('click', () => {
-  if(currentBase==='sat') return;
-  map.removeLayer(lightLayer); satLayer.addTo(map); currentBase='sat';
-  document.getElementById('btn-sat').classList.add('active');
-  document.getElementById('btn-light').classList.remove('active');
-});
-document.getElementById('btn-light').addEventListener('click', () => {
-  if(currentBase==='light') return;
-  map.removeLayer(satLayer); lightLayer.addTo(map); currentBase='light';
-  document.getElementById('btn-light').classList.add('active');
-  document.getElementById('btn-sat').classList.remove('active');
-});
-
-// ============ TABS ============
-document.querySelectorAll('.tab-btn').forEach(btn => {
+// abrir e fechar as janelas sobre o mapa
+function fecharJanelas(){
+  document.querySelectorAll('.map-overlay').forEach(o => o.hidden = true);
+  document.querySelectorAll('.map-card-btn').forEach(b => b.setAttribute('aria-expanded', 'false'));
+}
+document.querySelectorAll('.map-card-btn').forEach(btn => {
+  try { if(localStorage.getItem('pjc-visto-' + btn.dataset.ov)) btn.classList.add('visto'); } catch(e){}
+  btn.setAttribute('aria-expanded', 'false');
   btn.addEventListener('click', () => {
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    document.getElementById('tab-municipios').style.display = btn.dataset.tab === 'municipios' ? 'block' : 'none';
-    document.getElementById('tab-sobre').style.display = btn.dataset.tab === 'sobre' ? 'block' : 'none';
+    const ov = document.getElementById(btn.dataset.ov), abrir = ov.hidden;
+    fecharJanelas();
+    if(abrir){ ov.hidden = false; btn.setAttribute('aria-expanded', 'true'); ov.querySelector('.ov-close').focus(); }
+    btn.classList.add('visto');   // para de pulsar depois de aberto
+    try { localStorage.setItem('pjc-visto-' + btn.dataset.ov, '1'); } catch(e){}
   });
 });
+document.querySelectorAll('.ov-close').forEach(b => b.addEventListener('click', fecharJanelas));
+document.addEventListener('keydown', e => { if(e.key === 'Escape') fecharJanelas(); });
+['map-cards', 'ov-numeros', 'ov-costumes'].forEach(id => { const el = document.getElementById(id); L.DomEvent.disableClickPropagation(el); L.DomEvent.disableScrollPropagation(el); });
+// os botões das janelas só aparecem no capítulo Cidade-gêmea
+function mostrarBotoesJanelas(){ document.getElementById('map-cards').style.display = activeTab === 'gemea' ? '' : 'none'; if(activeTab !== 'gemea') fecharJanelas(); }
+document.getElementById('chart-legend').innerHTML = `<span lang="es"><i style="background:var(--py)"></i>${FLAG.PY} Lado paraguayo</span><span lang="pt-BR"><i style="background:var(--br)"></i>${FLAG.BR} Lado brasileiro</span>`;
 
-// ============ STYLES ============
-const FEATURED = ['Pedro Juan Caballero', 'Yby Yaú'];
+// ============ MAPA E MAPAS DE FUNDO ============
+const map = L.map('map', {zoomControl:true, minZoom:6}).setView([-22.54, -55.73], 13);
+map.createPane('swipePane').style.zIndex = 210;   // camada da cortina, logo acima do mapa de fundo
+map.getPane('swipePane').style.pointerEvents = 'none';
 
-function municipioStyle(feature) {
-  const featured = FEATURED.includes(feature.properties.NAME_2);
-  return {
-    fillColor: featured ? '#b9744a' : '#d8c9a9',
-    fillOpacity: featured ? 0.75 : 0.55,
-    color: featured ? '#3c4a2c' : '#3c4a2c99',
-    weight: featured ? 1.4 : 0.8,
-  };
-}
-function limiteStyle() {
-  return { fill: false, color: '#3c4a2c', weight: 3.2, lineJoin: 'round' };
-}
-function riosStyle() {
-  return { color: '#3a6f95', weight: 2.4, lineCap: 'round', lineJoin: 'round' };
-}
-function cursosStyle() {
-  return { color: '#5b8fae', weight: 1.1, lineCap: 'round', lineJoin: 'round' };
-}
-function lagosStyle() {
-  return { fillColor: '#5b8fae', fillOpacity: 0.55, color: '#3a6f95', weight: 1 };
-}
-const selectedStyle = { color: '#b9744a', weight: 3, fillOpacity: 0.75 };
+const BASES = {
+  sat:  {nome: () => t('sw_cur'), make: pane => L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {attribution:'Imagem &copy; Esri, Maxar, Earthstar Geographics', maxZoom:19, pane})},
+  ruas: {nome: () => t('ruas_nome'), make: pane => L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {attribution:'&copy; OpenStreetMap', maxZoom:19, pane})},
+};
+// Fotos antigas do Esri World Imagery Wayback com imagem diferente sobre a cidade.
+// "release" = número da versão no Wayback; pt/es = data de captura no centro da cidade (metadados Esri).
+const WAYBACK = [
+  {key:'wb2007', release:4230,  pt:'jun/2007',  es:'jun/2007'},
+  {key:'wb2014', release:13770, pt:'mar/2014',  es:'mar/2014'},
+  {key:'wb2016', release:2168,  pt:'jul/2016',  es:'jul/2016'},
+  {key:'wb2018', release:11351, pt:'2017–2018', es:'2017–2018'},
+  {key:'wb2019', release:9181,  pt:'out/2019',  es:'oct/2019'},
+  {key:'wb2021', release:15423, pt:'jan/2021',  es:'ene/2021'},
+  {key:'wb2022', release:44873, pt:'abr/2022',  es:'abr/2022'},
+];
+WAYBACK.forEach(w => BASES[w.key] = {nome: () => t('sw_foto') + ' ' + w[LANG], wayback:true, make: pane => L.tileLayer(
+  'https://wayback.maptiles.arcgis.com/arcgis/rest/services/World_Imagery/WMTS/1.0.0/default028mm/MapServer/tile/' + w.release + '/{z}/{y}/{x}',
+  {attribution:'Foto ' + w.pt + ' &copy; Esri World Imagery Wayback', maxZoom:19, pane})});
+const satLabels = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', {maxZoom:19, opacity:.8});
+let currentBase = 'sat';
+let baseLayer = BASES.sat.make('tilePane').addTo(map);
+satLabels.addTo(map);
 
-// ============ LAYERS (loaded async) ============
-let municipiosLayer, limiteLayer, riosLayer, cursosLayer, lagosLayer;
-let allMuniFeatures = [];
-let selectedLayer = null;
-
-function fetchJSON(url) {
-  return fetch(url).then(r => { if(!r.ok) throw new Error(url + ' -> ' + r.status); return r.json(); });
+document.querySelectorAll('#basemap-toggle button').forEach(btn => btn.addEventListener('click', () => setBase(btn.dataset.base)));
+function setBase(key){
+  if(key === currentBase) return;
+  map.removeLayer(baseLayer);
+  baseLayer = BASES[key].make('tilePane').addTo(map);
+  if(key === 'sat') satLabels.addTo(map); else map.removeLayer(satLabels);
+  currentBase = key;
+  document.querySelectorAll('#basemap-toggle button').forEach(b => b.classList.toggle('active', b.dataset.base === key));
+  updateSwipeTags();
 }
+
+// ============ ABAS E CAIXAS DE AJUDA ============
+let activeTab = 'gemea';
+document.querySelectorAll('.tab-btn').forEach(btn => btn.addEventListener('click', () => {
+  if(btn.dataset.tab === activeTab) return;
+  activeTab = btn.dataset.tab;
+  desligarCortina();   // a cortina de uma aba não continua na outra
+  mostrarBotoesJanelas();
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b === btn));
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.toggle('active', p.id === 'tab-' + btn.dataset.tab));
+  if(activeTab === 'tempo') enterTempo();
+  if(activeTab === 'memoria') enterMemoria();
+  if(L_.territorios) refreshLayers();
+}));
+document.querySelectorAll('.mini-btn[data-box]').forEach(btn => btn.addEventListener('click', () => {
+  const box = document.getElementById(btn.dataset.box);
+  const open = !box.classList.contains('show');
+  document.querySelectorAll('.info-box').forEach(b => b.classList.remove('show'));
+  document.querySelectorAll('.mini-btn[data-box]').forEach(b => b.setAttribute('aria-expanded', 'false'));
+  if(open){ box.classList.add('show'); btn.setAttribute('aria-expanded', 'true'); }
+}));
+
+// tema claro/escuro (lembra a escolha só neste navegador)
+try { const th = localStorage.getItem('pjc-tema'); if(th) document.documentElement.dataset.theme = th; } catch(e){}
+document.getElementById('theme-btn').addEventListener('click', () => {
+  const dark = document.documentElement.dataset.theme
+    ? document.documentElement.dataset.theme === 'dark'
+    : matchMedia('(prefers-color-scheme: dark)').matches;
+  document.documentElement.dataset.theme = dark ? 'light' : 'dark';
+  try { localStorage.setItem('pjc-tema', document.documentElement.dataset.theme); } catch(e){}
+});
+
+// ============ ESTILOS DAS CAMADAS ============
+const EQUIP_COR = {'Educação':'#c08a3e','Saúde':'#a5493b','Religião':'#6b5b45','Segurança':'#3e4f5c','Administração pública':'#3e5a3a','Comércio':'#d19468','Transporte':'#5e8583','Cultura':'#8a6d3b'};
+const VERDE_COR = {'Praça / parque':'#5d8a3a','Esporte':'#8fb36a','Mata / vegetação':'#2f5a2a','Gramado':'#a9c294'};
+
+function territorioStyle(f){
+  const p = f.properties;
+  return {fillColor: COR[p.pais], fillOpacity: p.destaque ? .10 : .05, color: p.destaque ? COR[p.pais] : '#3e5a3a', weight: p.destaque ? 2 : .9, opacity:.9};
+}
+const URB_FILL = {PY:'#d08a4f', BR:'#3fa9cf'};
+const urbanaStyle = f => ({fillColor: URB_FILL[f.properties.pais], fillOpacity:.32, color: URB_FILL[f.properties.pais], weight:1.6, dashArray:'4 3'});
+const viaStyle = f => ({color:'#f2f1e8', weight: f.properties.classe === 'principal' ? 3.2 : 2, opacity:.9});
+const verdeStyle = f => ({fillColor: VERDE_COR[f.properties.tipo] || '#5d8a3a', fillOpacity:.55, color: VERDE_COR[f.properties.tipo] || '#5d8a3a', weight:.6});
+const hidroStyle = f => ({color:'#5e8583', weight: f.properties.tipo === 'Rio' ? 2.6 : 1.4, opacity:.95});
+
+// ============ CARREGAR DADOS ============
+const getJSON = url => fetch(url).then(r => { if(!r.ok) throw new Error(url + ' (' + r.status + ')'); return r.json(); });
+const L_ = {};               // camadas Leaflet por chave
+let territorios = [], DADOS = {}, kmUrb = null, EQ_CATS = [];
 
 Promise.all([
-  fetchJSON('data/limite.geojson'),
-  fetchJSON('data/municipios.geojson'),
-  fetchJSON('data/rios.geojson'),
-  fetchJSON('data/cursos_dagua.geojson'),
-  fetchJSON('data/lagos.geojson'),
-]).then(([limite, municipios, rios, cursos, lagos]) => {
+  getJSON('data/territorios.geojson'), getJSON('data/fronteira.geojson'), getJSON('data/area_urbana.geojson'),
+  getJSON('data/vias.geojson'), getJSON('data/areas_verdes.geojson'), getJSON('data/equipamentos.geojson'),
+  getJSON('data/hidrografia_urbana.geojson'), getJSON('data/limite_paraguai.geojson')
+]).then(([terr, fronteira, urbana, vias, verdes, equip, hidro, paraguai]) => {
+  DADOS = {terr, urbana, equip};
 
-  limiteLayer = L.geoJSON(limite, { style: limiteStyle }).addTo(map);
-  cursosLayer = L.geoJSON(cursos, { style: cursosStyle }).addTo(map);
-  riosLayer = L.geoJSON(rios, { style: riosStyle }).addTo(map);
-  lagosLayer = L.geoJSON(lagos, { style: lagosStyle }).addTo(map);
+  L_.paraguai = L.geoJSON(paraguai, {style:{fill:false, color:'#3e5a3a', weight:1.5, opacity:.6}, interactive:false});
 
-  municipiosLayer = L.geoJSON(municipios, {
-    style: municipioStyle,
-    onEachFeature: (feature, layer) => {
-      layer.on('click', () => selectMunicipio(feature.properties.NAME_2, layer));
-      layer.bindPopup(popupHTML(feature.properties));
-    }
-  }).addTo(map);
+  L_.territorios = L.geoJSON(terr, {style: territorioStyle, onEachFeature: (f, l) => l.bindPopup(() => territorioPopup(f.properties))});
+  territorios = terr.features;
 
-  allMuniFeatures = municipios.features.slice().sort((a,b) => a.properties.NAME_2.localeCompare(b.properties.NAME_2));
-  renderMuniList(allMuniFeatures);
+  // popups: cada lado no seu idioma
+  L_.urbana = L.geoJSON(urbana, {style: urbanaStyle, onEachFeature: (f, l) => l.bindPopup(() => { const p = f.properties, k = p.pais;
+    return `<div class="pp-title">${ts(k, 's_area_urb')} · ${ts(k, 's_pais')}</div>
+     <div class="pp-row"><b>${esc(p.nome)}</b></div>
+     <div class="pp-row">${ts(k, 's_area')}: <b>${fmt1(p.area_km2)} km²</b> ${ts(k, 's_calc')}</div>
+     <div class="pp-src">${ts(k, 's_fonte')}: ${ts(k, 's_urb_src')}</div>`; })});
 
+  L_.hidroRegional = null; // carregada só quando o mapa está afastado (arquivo maior)
+  L_.hidroUrbana = L.geoJSON(hidro, {style: hidroStyle, onEachFeature: (f, l) => { if(f.properties.nome) l.bindTooltip(esc(f.properties.nome), {sticky:true, className:'road-tip'}); }});
+
+  L_.verdes = L.geoJSON(verdes, {style: verdeStyle, onEachFeature: (f, l) => l.bindPopup(() => { const p = f.properties, k = p.pais || 'BR';
+    return `<div class="pp-title">${esc(p.nome || ts(k, p.tipo))}</div>
+     <div class="pp-row">${ts(k, 's_tipo')}: <b>${ts(k, p.tipo)}</b> · ${ts(k, 's_pais')}</div>
+     <div class="pp-src">${ts(k, 's_osm')}</div>`; })});
+
+  L_.vias = L.geoJSON(vias, {style: viaStyle, onEachFeature: (f, l) => { if(f.properties.nome) l.bindTooltip(esc(f.properties.nome), {sticky:true, className:'road-tip'}); }});
+
+  // equipamentos: uma camada por categoria
+  EQ_CATS = Object.keys(EQUIP_COR).filter(c => equip.features.some(f => f.properties.categoria === c));
+  EQ_CATS.forEach(cat => {
+    L_['eq:' + cat] = L.geoJSON({type:'FeatureCollection', features: equip.features.filter(f => f.properties.categoria === cat)}, {
+      pointToLayer: (f, ll) => L.circleMarker(ll, {radius:5.5, fillColor: EQUIP_COR[cat], fillOpacity:.95, color:'#fff', weight:1.5}),
+      onEachFeature: (f, l) => l.bindPopup(() => { const p = f.properties, k = p.pais || 'BR';
+        return `<div class="pp-title">${esc(p.nome || ts(k, 's_sem_nome'))}</div>
+         <div class="pp-row"><b>${ts(k, 'tp_' + p.tipo)}</b> · ${ts(k, cat)} · ${ts(k, 's_pais')}</div>
+         <div class="pp-src">${ts(k, 's_osm')}</div>`; })
+    });
+  });
+
+  // fronteira: contorno branco por baixo + linha terracota por cima
+  const fUrb = {type:'FeatureCollection', features: fronteira.features.filter(f => f.properties.trecho === 'urbano')};
+  const fRur = {type:'FeatureCollection', features: fronteira.features.filter(f => f.properties.trecho === 'rural')};
+  kmUrb = fUrb.features[0].properties.km;
+  const fronteiraPopup = tr => `<div class="pp-title">${t('fr_title')}</div>
+     <div class="pp-row">${tr === 'urbano' ? t('fr_urb', {km: fmt1(kmUrb) + ' km'}) : t('fr_rur')}</div>
+     <div class="pp-src">${t('fr_src')}</div>`;
+  L_.fronteira = L.featureGroup([
+    L.geoJSON(fRur, {style:{color:'#fff', weight:5, opacity:.6}, interactive:false}),
+    L.geoJSON(fRur, {style:{color:'#b9744a', weight:2.5, dashArray:'8 6'}}).bindPopup(() => fronteiraPopup('rural')),
+    L.geoJSON(fUrb, {style:{color:'#fff', weight:9, opacity:.85}, interactive:false}),
+    L.geoJSON(fUrb, {style:{color:'#b9744a', weight:5}}).bindPopup(() => fronteiraPopup('urbano')),
+  ]);
+  L_.fronteiraUrbBounds = L.geoJSON(fUrb).getBounds();
+
+  // rótulos dos países: cada um no seu idioma (aparecem só de perto)
+  L_.rotulos = L.layerGroup([
+    L.marker([-22.566, -55.748], {icon: L.divIcon({className:'', html:'<div class="country-label py">' + FLAG.PY + 'Paraguay</div>', iconSize:null}), interactive:false}),
+    L.marker([-22.516, -55.704], {icon: L.divIcon({className:'', html:'<div class="country-label br">' + FLAG.BR + 'Brasil</div>', iconSize:null}), interactive:false}),
+  ]);
+
+  applyLang(LANG);
+  map.fitBounds(L_.fronteiraUrbBounds, {padding:[30,30]});
   document.getElementById('loading').style.display = 'none';
-  map.fitBounds(limiteLayer.getBounds(), { padding: [20,20] });
 }).catch(err => {
-  document.getElementById('loading').textContent = 'Erro ao carregar dados: ' + err.message;
+  const ld = document.getElementById('loading'); ld.dataset.err = 1; ld.textContent = t('err') + err.message;
   console.error(err);
 });
 
-function popupHTML(p) {
-  const featured = FEATURED.includes(p.NAME_2) ? ' <span style="color:#b9744a;">★</span>' : '';
-  return `<div class="popup-title">${p.NAME_2}${featured}</div>
-    <div class="popup-row"><b>Departamento:</b> ${p.NAME_1}</div>
-    <div class="popup-row"><b>Tipo:</b> ${p.TYPE_2 || '—'}</div>`;
+function territorioPopup(p){
+  const k = p.pais, pct = Math.round(p.pop_urb / p.pop * 100);
+  return `<div class="pp-title">${esc(p.nome)} <span class="flag ${k.toLowerCase()}">${k}</span></div>
+    <div class="pp-row">${p.unidade} · ${esc(p.dep)}</div>
+    <div class="pp-row">${ts(k, 's_pop22')}: <b>${fmt(p.pop)}</b></div>
+    <div class="pp-row">${ts(k, 's_urbana')}: <b>${fmt(p.pop_urb)}</b> (${pct}%) · ${ts(k, 's_rural')}: <b>${fmt(p.pop_rur)}</b></div>
+    <div class="pp-row">${ts(k, 's_area')}: <b>${fmt1(p.area_km2)} km²</b> ${p.area_oficial ? ts(k, 's_oficial') : ts(k, 's_calc')}</div>
+    <div class="pp-src">${ts(k, 's_fonte')}: ${ts(k, 's_censo')}</div>`;
 }
 
-function renderMuniList(features) {
-  const list = document.getElementById('muni-list');
-  document.getElementById('muni-count').textContent = features.length + ' município(s)';
-  list.innerHTML = '';
-  features.forEach(f => {
-    const p = f.properties;
-    const div = document.createElement('div');
-    const featured = FEATURED.includes(p.NAME_2);
-    div.className = 'muni-item' + (featured ? ' featured' : '');
-    div.innerHTML = `<span class="swatch" style="background:${featured ? '#b9744a' : '#d8c9a9'};border:1px solid #3c4a2c66;"></span>
-      <span class="name">${p.NAME_2}</span>
-      <div class="meta">${p.NAME_1}${featured ? ' · destaque do projeto' : ''}</div>`;
-    div.addEventListener('click', () => {
-      let target = null;
-      municipiosLayer.eachLayer(l => { if(l.feature.properties.NAME_2 === p.NAME_2 && l.feature.properties.GID_2 === p.GID_2) target = l; });
-      if(target) selectMunicipio(p.NAME_2, target, true);
-    });
-    list.appendChild(div);
+// ============ LISTA DE CAMADAS (também é a legenda) ============
+const LAYERS = [
+  {key:'fronteira', on:true, keyHtml: () => `<span><i class="ln" style="border-color:#b9744a"></i>${t('lyk_fronteira')}</span>`},
+  {key:'urbana', on:true, keyHtml: () => `<span><i style="background:#d08a4faa"></i>Paraguay</span><span><i style="background:#3fa9cfaa"></i>Brasil</span>`},
+  {key:'territorios', on:true, keyHtml: () => `<span><i style="border:2px solid #c4762f"></i>PJC</span><span><i style="border:2px solid #0b7398"></i>Ponta Porã</span><span><i style="border:1px solid #3e5a3a"></i>${t('lyk_outros')}</span>`},
+  {key:'vias', on:false, keyHtml: () => `<span><i class="ln" style="border-color:#c9c2a8"></i>${t('lyk_vias')}</span>`},
+  {key:'verdes', on:false, keyHtml: () => Object.entries(VERDE_COR).map(([k, c]) => `<span><i style="background:${c}"></i>${t(k)}</span>`).join('')},
+  {key:'equip', grupo:true},
+  {key:'hidro', on:true, keyHtml: () => `<span><i class="ln" style="border-color:#5e8583"></i>${t('lyk_hidro')}</span>`},
+];
+const layerOn = {};
+LAYERS.forEach(l => { if(!l.grupo) layerOn[l.key] = l.on; });
+function buildLayerList(){
+  EQ_CATS.forEach(c => { if(!('eq:' + c in layerOn)) layerOn['eq:' + c] = false; });
+  const cnt = (c, k) => DADOS.equip.features.filter(f => f.properties.categoria === c && f.properties.pais === k).length;
+  const box = document.getElementById('layer-list');
+  box.innerHTML = LAYERS.map(l => l.grupo
+    ? `<div class="layer-group">
+        <label class="layer"><input type="checkbox" id="equip-all">
+          <span class="txt"><span class="name">${t('ly_equip')}</span><div class="meta">${t('lym_equip')}</div></span></label>
+        <div class="sublayers">${EQ_CATS.map(c => `<label class="sub"><input type="checkbox" data-layer="eq:${c}" ${layerOn['eq:' + c] ? 'checked' : ''}>
+          <span class="dot" style="background:${EQUIP_COR[c]}"></span><span class="st">${t(c)}<span class="sd">${t('d_' + c)}</span></span><span class="cnt">PY ${cnt(c, 'PY')} · BR ${cnt(c, 'BR')}</span></label>`).join('')}</div>
+      </div>`
+    : `<label class="layer"><input type="checkbox" data-layer="${l.key}" ${layerOn[l.key] ? 'checked' : ''}>
+        <span class="txt"><span class="name">${t('ly_' + l.key)}</span><div class="meta">${t('lym_' + l.key)}</div><div class="key">${l.keyHtml()}</div></span></label>`).join('');
+  box.querySelectorAll('input[data-layer]').forEach(inp => inp.addEventListener('change', () => { layerOn[inp.dataset.layer] = inp.checked; syncEquipAll(); refreshLayers(); }));
+  document.getElementById('equip-all').addEventListener('change', e => {
+    EQ_CATS.forEach(c => layerOn['eq:' + c] = e.target.checked);
+    box.querySelectorAll('input[data-layer^="eq:"]').forEach(i => i.checked = e.target.checked);
+    refreshLayers();
+  });
+  syncEquipAll();
+  refreshLayers();
+}
+function syncEquipAll(){
+  const all = document.getElementById('equip-all'); if(!all) return;
+  const n = EQ_CATS.filter(c => layerOn['eq:' + c]).length;
+  all.checked = n === EQ_CATS.length; all.indeterminate = n > 0 && n < EQ_CATS.length;
+}
+// ordem de desenho: de baixo para cima
+const ORDER = () => ['territorios', 'urbana', 'verdes', 'crescimento', 'janela', 'hidro', 'vias', ...EQ_CATS.map(c => 'eq:' + c), 'fronteira', 'memoria'];
+const soCap1 = k => ['urbana', 'verdes', 'vias'].includes(k) || k.startsWith('eq:');   // temáticas do capítulo 1
+function refreshLayers(){
+  const z = map.getZoom();
+  ORDER().forEach(k => {
+    if(k === 'hidro') return refreshHidro(z);
+    const lyr = L_[k]; if(!lyr) return;
+    let on = layerOn[k];
+    if(k === 'memoria') on = activeTab === 'memoria';
+    else if(k === 'crescimento' || k === 'janela') on = activeTab === 'tempo' && (k === 'janela' || manchaOn);
+    else if((activeTab === 'tempo' || activeTab === 'memoria') && soCap1(k)) on = false;
+    if(k === 'urbana' && swipeKey) on = false;   // não cobrir as fotos durante a comparação
+    if(on) { if(!map.hasLayer(lyr)) lyr.addTo(map); } else map.removeLayer(lyr);
+  });
+  ORDER().forEach(k => { const lyr = L_[k]; if(lyr && map.hasLayer(lyr)) lyr.bringToFront(); });
+  if(z >= 12) L_.rotulos.addTo(map); else map.removeLayer(L_.rotulos);
+  if(L_.paraguai){ if(z < 9) L_.paraguai.addTo(map); else map.removeLayer(L_.paraguai); }
+}
+let hidroLoading = false;
+function refreshHidro(z){
+  const perto = z >= 12;
+  if(layerOn.hidro && perto) L_.hidroUrbana.addTo(map); else map.removeLayer(L_.hidroUrbana);
+  if(layerOn.hidro && !perto){
+    if(L_.hidroRegional) L_.hidroRegional.addTo(map);
+    else if(!hidroLoading){
+      hidroLoading = true;
+      getJSON('data/cursos_dagua.geojson').then(d => {
+        L_.hidroRegional = L.geoJSON(d, {style:{color:'#5e8583', weight:1, opacity:.85}, onEachFeature:(f,l) => { if(f.properties.nome) l.bindTooltip(esc(f.properties.nome), {sticky:true, className:'road-tip'}); }});
+        refreshLayers();
+      });
+    }
+  } else if(L_.hidroRegional) map.removeLayer(L_.hidroRegional);
+}
+map.on('zoomend', () => { if(L_.territorios) refreshLayers(); });
+
+// ============ PAINEL DE COMPARAÇÃO (coluna PY em espanhol, coluna BR em português) ============
+function buildCompare(){
+  const t_ = {}; DADOS.terr.features.filter(f => f.properties.destaque).forEach(f => t_[f.properties.pais] = f.properties);
+  const u = {}; DADOS.urbana.features.forEach(f => u[f.properties.pais] = f.properties);
+  const rows = [
+    {lbl:'s_pop_total', v: k => t_[k].pop, f: fmt, unit:'s_hab'},
+    {lbl:'s_pop_urb', v: k => t_[k].pop_urb, f: fmt, unit:'s_hab', extra: k => ` <span class="unit">(${Math.round(t_[k].pop_urb / t_[k].pop * 100)}%)</span>`},
+    {lbl:'s_area_urb', v: k => u[k].area_km2, f: fmt1, unit:'km²'},
+    {lbl:'s_dens', v: k => t_[k].pop_urb / u[k].area_km2, f: x => fmt(Math.round(x)), unit:'hab./km²'},
+    {lbl:'s_area_terr', v: k => t_[k].area_km2, f: x => fmt(Math.round(x)), unit:'km²'},
+  ];
+  let html = `<div class="row head"><div class="cell py">${esc(t_.PY.nome)}<small>${FLAG.PY} Paraguay</small></div><div class="cell br">${esc(t_.BR.nome)}<small>${FLAG.BR} Brasil</small></div></div>`;
+  rows.forEach(r => {
+    const max = Math.max(r.v('PY'), r.v('BR'));
+    const cell = k => `<div class="cell"><div class="clbl">${ts(k, r.lbl)}</div><span class="val">${r.f(r.v(k))}</span><span class="unit">${ts(k, r.unit)}</span>${r.extra ? r.extra(k) : ''}
+       <div class="bar"><span style="width:${(r.v(k) / max * 100).toFixed(1)}%;background:var(--${k.toLowerCase()})"></span></div></div>`;
+    html += `<div class="row">${cell('PY')}${cell('BR')}</div>`;
+  });
+  document.getElementById('compare').innerHTML = html;
+}
+
+document.getElementById('go-border').addEventListener('click', () => L_.fronteiraUrbBounds && map.flyToBounds(L_.fronteiraUrbBounds, {padding:[30,30]}));
+document.getElementById('go-region').addEventListener('click', () => L_.territorios && map.flyToBounds(L_.territorios.getBounds(), {padding:[20,20]}));
+
+// ============ LISTA DE TERRITÓRIOS ============
+let selected = null;
+const semAcento = s => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+function renderList(){
+  const q = semAcento(document.getElementById('search').value.trim());
+  const feats = q ? territorios.filter(f => semAcento(f.properties.nome).includes(q)) : territorios;
+  const list = document.getElementById('t-list');
+  const sorted = feats.slice().sort((a, b) => (b.properties.destaque - a.properties.destaque) || a.properties.nome.localeCompare(b.properties.nome));
+  list.innerHTML = sorted.map(f => { const p = f.properties; return `<div class="t-item${selected === p.nome ? ' selected' : ''}" data-nome="${esc(p.nome)}" tabindex="0" role="button">
+      ${FLAG[p.pais]} <span class="name">${esc(p.nome)}</span><span class="flag ${p.pais.toLowerCase()}">${p.pais}</span>
+      <div class="meta">${p.unidade} · ${fmt(p.pop)} ${ts(p.pais, 's_hab')} (2022)</div></div>`; }).join('');
+  list.querySelectorAll('.t-item').forEach(el => {
+    const go = () => selectTerritorio(el.dataset.nome);
+    el.addEventListener('click', go);
+    el.addEventListener('keydown', e => { if(e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } });
+  });
+}
+function selectTerritorio(nome){
+  selected = nome;
+  if(!layerOn.territorios){ layerOn.territorios = true; document.querySelector('[data-layer="territorios"]').checked = true; refreshLayers(); }
+  L_.territorios.eachLayer(l => {
+    L_.territorios.resetStyle(l);
+    if(l.feature.properties.nome === nome){ l.setStyle({weight:3.5, color:'#b9744a', fillOpacity:.2}); map.flyToBounds(l.getBounds(), {padding:[30,30]}); setTimeout(() => l.openPopup(l.getBounds().getCenter()), 900); }
+  });
+  document.querySelectorAll('.t-item').forEach(el => el.classList.toggle('selected', el.dataset.nome === nome));
+}
+document.getElementById('search').addEventListener('input', renderList);
+
+// ============ CORTINA (SWIPE) ============
+// A foto da direita fica numa camada própria, recortada a partir da linha divisória.
+const mapEl = document.getElementById('map');
+const swipePane = map.getPane('swipePane');
+let swipeLayer = null, swipeKey = null, swipeX = .5;
+function setSwipe(rightKey){
+  if(swipeLayer){ map.removeLayer(swipeLayer); swipeLayer = null; }
+  swipeKey = rightKey;
+  mapEl.classList.toggle('swipe-on', !!rightKey);
+  if(rightKey) swipeLayer = BASES[rightKey].make('swipePane').addTo(map);
+  if(L_.territorios) refreshLayers();
+  updateSwipeTags(); updateClip();
+}
+function desligarCortina(){
+  if(swipeKey) setSwipe(null);
+  if(BASES[currentBase].wayback) setBase('sat');
+}
+function updateSwipeTags(){
+  document.getElementById('swipe-tag-l').textContent = '◀ ' + BASES[currentBase].nome();
+  document.getElementById('swipe-tag-r').textContent = swipeKey ? BASES[swipeKey].nome() + ' ▶' : '';
+}
+function updateClip(){
+  if(!swipeLayer) return;
+  const size = map.getSize();
+  const nw = map.containerPointToLayerPoint([0, 0]);
+  const se = map.containerPointToLayerPoint(size);
+  const x = map.containerPointToLayerPoint([swipeX * size.x, 0]).x;
+  swipePane.style.clip = `rect(${nw.y}px, ${se.x}px, ${se.y}px, ${x}px)`;
+  document.getElementById('swipe-divider').style.left = (swipeX * 100) + '%';
+  document.getElementById('swipe-handle').setAttribute('aria-valuenow', Math.round(swipeX * 100));
+}
+map.on('move zoom resize zoomend', updateClip);
+const handle = document.getElementById('swipe-handle');
+handle.addEventListener('pointerdown', e => {
+  e.preventDefault(); e.stopPropagation(); handle.setPointerCapture(e.pointerId); map.dragging.disable();
+  const move = ev => { const r = mapEl.getBoundingClientRect(); swipeX = Math.min(.98, Math.max(.02, (ev.clientX - r.left) / r.width)); updateClip(); };
+  const up = () => { handle.removeEventListener('pointermove', move); handle.removeEventListener('pointerup', up); handle.removeEventListener('pointercancel', up); map.dragging.enable(); };
+  handle.addEventListener('pointermove', move); handle.addEventListener('pointerup', up); handle.addEventListener('pointercancel', up);
+});
+handle.addEventListener('keydown', e => {
+  if(e.key === 'ArrowLeft') { swipeX = Math.max(.02, swipeX - .05); updateClip(); }
+  if(e.key === 'ArrowRight') { swipeX = Math.min(.98, swipeX + .05); updateClip(); }
+});
+L.DomEvent.disableClickPropagation(document.getElementById('swipe-divider'));
+
+// caixas de comparação (iguais nas abas 1 e 2): só satélite atual e fotos antigas
+function fillSwipeBoxes(){
+  const opts = ['sat', ...WAYBACK.map(w => w.key)].map(k => `<option value="${k}">${BASES[k].nome()}</option>`).join('');
+  document.querySelectorAll('.swipe-box').forEach(box => {
+    const l = box.querySelector('.sw-l'), r = box.querySelector('.sw-r');
+    const lv = l.value || box.dataset.l, rv = r.value || box.dataset.r;
+    l.innerHTML = opts; r.innerHTML = opts; l.value = lv; r.value = rv;
+  });
+}
+document.querySelectorAll('.swipe-box').forEach(box => {
+  box.querySelector('.sw-go').addEventListener('click', () => {
+    const l = box.querySelector('.sw-l').value, r = box.querySelector('.sw-r').value;
+    if(l === r) return alert(t('sw_same'));
+    if(activeTab === 'tempo'){ manchaOn = false; document.getElementById('mancha-on').checked = false; refreshLayers(); }
+    setBase(l); swipeX = .5; setSwipe(r);
+  });
+  box.querySelector('.sw-off').addEventListener('click', desligarCortina);
+});
+
+// ============ CAPÍTULO 2: CRESCIMENTO URBANO ============
+const FONTES = {
+  mapbiomas: {nome:'MapBiomas', arquivo:'data/crescimento_mapbiomas.geojson'},
+};
+let crescInfo = null, fonteAtual = 'mapbiomas', anoAtual = null, manchaOn = true, tempoIniciado = false;
+const crescCache = {};
+
+// rampa sequencial (um só tom terroso, escuro = antigo -> claro = recente)
+const RAMPA = ['#4a2410', '#8a4b22', '#c4762f', '#e8b06a', '#f7e2a8'];
+function corAno(ano, a0, a1){
+  const p = (a1 === a0 ? 1 : (ano - a0) / (a1 - a0)) * (RAMPA.length - 1);
+  const i = Math.min(Math.floor(p), RAMPA.length - 2), f = p - i;
+  const h = c => [1, 3, 5].map(k => parseInt(c.slice(k, k + 2), 16));
+  const [a, b] = [h(RAMPA[i]), h(RAMPA[i + 1])];
+  return '#' + a.map((v, k) => Math.round(v + (b[k] - v) * f).toString(16).padStart(2, '0')).join('');
+}
+
+function enterTempo(){
+  if(tempoIniciado) return;
+  tempoIniciado = true;
+  getJSON('data/crescimento_areas.json').then(info => {
+    crescInfo = info;
+    const [x0, y0, x1, y1] = info.janela;
+    L_.janela = L.rectangle([[y0, x0], [y1, x1]], {fill:false, color:'#f2f1e8', weight:1.5, dashArray:'6 5', opacity:.9, interactive:false});
+    map.flyToBounds(L_.janela.getBounds(), {padding:[10, 10]});
+    setFonte('mapbiomas');
+  });
+}
+function textosTempo(){
+  if(!crescInfo) return;
+  const d = crescInfo[fonteAtual], anos = d.anos, n = anos.length - 1;
+  document.getElementById('metodo').innerHTML = t('met_' + fonteAtual);
+  document.getElementById('tempo-lead').innerHTML = t('t_lead', {
+    py0: fmt1(d.area_km2.PY[0]), py1: fmt1(d.area_km2.PY[n]), br0: fmt1(d.area_km2.BR[0]), br1: fmt1(d.area_km2.BR[n]),
+    a0: anos[0], a1: anos[n], fonte: FONTES[fonteAtual].nome});
+  playBtn.setAttribute('aria-label', timer ? t('t_pause') : t('t_play'));
+  document.getElementById('ano').setAttribute('aria-label', t('t_ano'));
+  drawChart();
+}
+function setFonte(src){
+  fonteAtual = src;
+  const anos = crescInfo[src].anos;
+  const slider = document.getElementById('ano');
+  slider.min = anos[0]; slider.max = anos[anos.length - 1]; slider.step = 1;
+  anoAtual = anos[anos.length - 1]; slider.value = anoAtual;
+  document.getElementById('ramp-a').textContent = anos[0];
+  document.getElementById('ramp-b').textContent = anos[anos.length - 1];
+  document.getElementById('ramp-bar').style.background = `linear-gradient(90deg, ${RAMPA.join(',')})`;
+  textosTempo();
+  carregarMancha(src);
+}
+function carregarMancha(src){
+  const pronto = gj => {
+    if(fonteAtual !== src) return;
+    if(L_.crescimento) map.removeLayer(L_.crescimento);
+    const anos = crescInfo[src].anos;
+    L_.crescimento = L.geoJSON(gj, {style: f => estiloMancha(f, anos), onEachFeature:(f, l) => l.bindTooltip(() => t('t_desde', {ano: f.properties.ano}) + ' (' + FONTES[src].nome + ')', {sticky:true, className:'road-tip'})});
+    refreshLayers(); atualizarAno();
+  };
+  if(crescCache[src]) pronto(crescCache[src]);
+  else getJSON(FONTES[src].arquivo).then(gj => { crescCache[src] = gj; pronto(gj); });
+}
+function estiloMancha(f, anos){
+  const a = f.properties.ano, vis = a <= anoAtual;
+  return {fillColor: corAno(a, anos[0], anos[anos.length - 1]), fillOpacity: vis ? .82 : 0, stroke: vis && a === anoAtual, color:'#ffffff', weight:1.2, opacity:.95};
+}
+function atualizarAno(){
+  document.getElementById('ano-atual').textContent = anoAtual;
+  if(L_.crescimento){ const anos = crescInfo[fonteAtual].anos; L_.crescimento.setStyle(f => estiloMancha(f, anos)); }
+  drawChart();
+}
+document.getElementById('ano').addEventListener('input', e => { pararAnimacao(); anoAtual = +e.target.value; atualizarAno(); });
+document.getElementById('mancha-on').addEventListener('change', e => { manchaOn = e.target.checked; refreshLayers(); });
+
+// animação
+let timer = null;
+const playBtn = document.getElementById('play');
+function pararAnimacao(){ if(timer){ clearInterval(timer); timer = null; playBtn.textContent = '▶'; playBtn.setAttribute('aria-label', t('t_play')); } }
+playBtn.addEventListener('click', () => {
+  if(timer) return pararAnimacao();
+  if(!manchaOn){ manchaOn = true; document.getElementById('mancha-on').checked = true; refreshLayers(); }
+  const anos = crescInfo[fonteAtual].anos;
+  let i = anoAtual >= anos[anos.length - 1] ? 0 : anos.indexOf(anoAtual) + 1;
+  playBtn.textContent = '❚❚'; playBtn.setAttribute('aria-label', t('t_pause'));
+  const passo = () => {
+    anoAtual = anos[i]; document.getElementById('ano').value = anoAtual; atualizarAno();
+    if(++i >= anos.length) pararAnimacao();
+  };
+  passo(); timer = setInterval(passo, 400);
+});
+
+// gráfico de linhas (SVG): área urbana por ano, um eixo, duas séries
+function drawChart(){
+  if(!crescInfo) return;
+  const d = crescInfo[fonteAtual], anos = d.anos, box = document.getElementById('chart');
+  const W = Math.max(280, box.clientWidth || 340), H = 200, m = {l:30, r:58, t:20, b:22};
+  const ymax = Math.ceil(Math.max(...d.area_km2.PY, ...d.area_km2.BR) / 10) * 10;
+  const X = a => m.l + (a - anos[0]) / (anos[anos.length - 1] - anos[0]) * (W - m.l - m.r);
+  const Y = v => H - m.b - v / ymax * (H - m.t - m.b);
+  const ticksY = []; for(let v = 0; v <= ymax; v += 10) ticksY.push(v);
+  const passoX = 10;
+  const ticksX = anos.filter(a => (a - anos[0]) % passoX === 0);
+  const linha = k => anos.map((a, i) => `${i ? 'L' : 'M'}${X(a).toFixed(1)},${Y(d.area_km2[k][i]).toFixed(1)}`).join('');
+  const iA = anos.indexOf(anoAtual), ult = anos.length - 1;
+  // evita rótulos finais sobrepostos
+  let yPY = Y(d.area_km2.PY[ult]), yBR = Y(d.area_km2.BR[ult]);
+  if(Math.abs(yPY - yBR) < 13){ const mid = (yPY + yBR) / 2, s = yPY <= yBR ? -1 : 1; yPY = mid + s * 7; yBR = mid - s * 7; }
+  box.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${t('t_chart_aria')}">
+    ${ticksY.map(v => `<line class="grid" x1="${m.l}" x2="${W - m.r}" y1="${Y(v)}" y2="${Y(v)}"/><text class="axis" x="${m.l - 6}" y="${Y(v) + 4}" text-anchor="end">${v}</text>`).join('')}
+    ${ticksX.map(a => `<text class="axis" x="${X(a)}" y="${H - 5}" text-anchor="middle">${a}</text>`).join('')}
+    <text class="axis" x="${m.l - 6}" y="8" text-anchor="end" style="font-size:10px">km²</text>
+    ${iA >= 0 ? `<line class="cursor" x1="${X(anoAtual)}" x2="${X(anoAtual)}" y1="${m.t}" y2="${H - m.b}"/>` : ''}
+    <path d="${linha('PY')}" fill="none" stroke="var(--py)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+    <path d="${linha('BR')}" fill="none" stroke="var(--br)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+    ${iA >= 0 ? ['PY', 'BR'].map(k => `<circle cx="${X(anoAtual)}" cy="${Y(d.area_km2[k][iA])}" r="4.5" fill="var(--${k.toLowerCase()})" stroke="var(--panel)" stroke-width="2"/>`).join('') : ''}
+    <text class="end" x="${X(anos[ult]) + 8}" y="${yPY + 4}">PY ${fmt1(d.area_km2.PY[ult])}</text>
+    <text class="end" x="${X(anos[ult]) + 8}" y="${yBR + 4}">BR ${fmt1(d.area_km2.BR[ult])}</text>
+    <rect class="hit" x="${m.l}" y="${m.t}" width="${W - m.l - m.r}" height="${H - m.t - m.b}" fill="transparent"/>
+  </svg><div class="chart-tip"></div>`;
+  const svg = box.querySelector('svg'), tip = box.querySelector('.chart-tip'), hit = box.querySelector('.hit');
+  const mostrar = ev => {
+    const r = svg.getBoundingClientRect(), px = (ev.clientX - r.left) * W / r.width;
+    let i = 0, best = 1e9; anos.forEach((a, j) => { const dd = Math.abs(X(a) - px); if(dd < best){ best = dd; i = j; } });
+    tip.innerHTML = `<b>${anos[i]}</b><br><i style="background:var(--py)"></i>Paraguay: ${fmt1(d.area_km2.PY[i])} km²<br><i style="background:var(--br)"></i>Brasil: ${fmt1(d.area_km2.BR[i])} km²`;
+    tip.style.display = 'block';
+    const left = X(anos[i]) / W * r.width;
+    tip.style.left = Math.min(Math.max(0, left - 70), r.width - 150) + 'px'; tip.style.top = '-6px';
+  };
+  hit.addEventListener('pointermove', mostrar);
+  hit.addEventListener('pointerleave', () => tip.style.display = 'none');
+  hit.addEventListener('click', mostrar);
+  document.getElementById('chart-table').innerHTML = `<table><tr><th>${t('t_ano')}</th><th>Paraguay (km²)</th><th>Brasil (km²)</th></tr>${anos.map((a, i) => `<tr><td>${a}</td><td>${fmt1(d.area_km2.PY[i])}</td><td>${fmt1(d.area_km2.BR[i])}</td></tr>`).join('')}</table>`;
+}
+window.addEventListener('resize', () => { if(activeTab === 'tempo') drawChart(); });
+
+// ============ CAPÍTULO 3: MEMÓRIA E CULTURA ============
+// Os lugares vêm da planilha data/memoria/lugares.csv (editável no Excel, Google Planilhas ou QGIS).
+const MEM_CAT = {
+  historia:  {cor:'#8a3b22', g:'<path d="M4 9h16L12 4z"/><path d="M7 9v10M12 9v10M17 9v10M5 20h14"/>'},
+  marco:     {cor:'#c4762f', g:'<path d="M6 21V3M6 4h11l-2.5 3.5L17 11H6"/>'},
+  natureza:  {cor:'#4f7a3a', g:'<path d="M12 3 6.5 12h3.5L7 17h10l-3-5h3.5z"/><path d="M12 17v4"/>'},
+  fe:        {cor:'#6b5b45', g:'<path d="M12 2v5M10 4h4M7 21v-9l5-5 5 5v9zM10.5 21v-4h3v4"/>'},
+  movimento: {cor:'#0b7398', g:'<path d="M5 8h14l-1 12H6z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/>'},
+  memoria:   {cor:'#b07a2a', g:'<circle cx="12" cy="13" r="7"/><path d="M12 9v4l2.5 2M9 3h6"/>'},
+  infancia: {cor:'#c4762f', g:'<path d="M12 3 18 10 12 17 6 10z"/><path d="M6 10h12M12 3v14"/><path d="M12 17q-1.5 2.5.5 4.5"/>'},
+  praca:    {cor:'#4f7a3a', g:'<circle cx="12" cy="8" r="4.5"/><path d="M12 12.5V20M6 17h12M7 17v3M17 17v3"/>'},
+  feira:    {cor:'#b07a2a', g:'<path d="M4 9h16l-1.6-4H5.6z"/><path d="M4 9q2 2.5 4 0 2 2.5 4 0 2 2.5 4 0 2 2.5 4 0M6 11v9M18 11v9M6 15h12"/>'},
+  escola:   {cor:'#0b7398', g:'<path d="M4 6q4-2 8 0v13q-4-2-8 0zM12 6q4-2 8 0v13q-4-2-8 0z"/>'},
+  igreja:   {cor:'#8a3b22', g:'<path d="M12 2v5M10 4h4M7 21v-9l5-5 5 5v9zM10.5 21v-4h3v4"/>'},
+  outro:    {cor:'#3e5a3a', g:'<path d="M12 20s-7-4.5-7-9.5A3.8 3.8 0 0 1 12 8a3.8 3.8 0 0 1 7 2.5C19 15.5 12 20 12 20z"/>'},
+};
+const glifo = (cat, cor = '#fff') => `<svg viewBox="0 0 24 24" fill="none" stroke="${cor}" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${MEM_CAT[cat].g}</svg>`;
+let memLugares = null, memFiltro = 'todos', memIniciado = false;
+
+// leitor de CSV simples: aceita ; ou , como separador, aspas e acentos (UTF-8)
+function lerCSV(txt){
+  txt = txt.replace(/^﻿/, '');
+  const prim = txt.split(/\r?\n/)[0];
+  const sep = (prim.match(/;/g) || []).length >= (prim.match(/,/g) || []).length ? ';' : ',';
+  const rows = []; let row = [], cell = '', q = false;
+  for(let i = 0; i < txt.length; i++){
+    const ch = txt[i];
+    if(q){ if(ch === '"'){ if(txt[i + 1] === '"'){ cell += '"'; i++; } else q = false; } else cell += ch; }
+    else if(ch === '"') q = true;
+    else if(ch === sep){ row.push(cell); cell = ''; }
+    else if(ch === '\n'){ row.push(cell); rows.push(row); row = []; cell = ''; }
+    else if(ch !== '\r') cell += ch;
+  }
+  if(cell || row.length){ row.push(cell); rows.push(row); }
+  const ALIAS = {nome:'nome_pt', descricao:'descricao_pt', latitude:'lat', longitude:'lon', long:'lon', lng:'lon'};
+  const head = rows.shift().map(h => { const k = semAcento(h.trim()).replace(/\s+/g, '_'); return ALIAS[k] || k; });
+  return rows.filter(r => r.some(c => c.trim())).map(r => Object.fromEntries(head.map((h, i) => [h, (r[i] ?? '').trim()])));
+}
+const num = s => parseFloat(String(s).replace(',', '.'));
+
+// enquadra os lugares da cidade (Cerro Corá, a ~40 km, fica acessível pela lista)
+function enquadrarMemoria(){
+  const perto = memLugares.filter(l => Math.abs(l.lat + 22.54) < .12 && Math.abs(l.lon + 55.725) < .12);
+  const pts = (perto.length ? perto : memLugares).map(l => [l.lat, l.lon]);
+  if(pts.length) map.flyToBounds(L.latLngBounds(pts), {padding:[50, 50], maxZoom:15});
+}
+function enterMemoria(){
+  if(memIniciado){ if(L_.memoria && L_.memoria.getLayers().length) enquadrarMemoria(); return; }
+  memIniciado = true;
+  fetch('data/memoria/lugares.csv', {cache:'no-cache'}).then(r => { if(!r.ok) throw new Error(r.status); return r.text(); }).then(txt => {
+    let ignorados = 0;
+    memLugares = lerCSV(txt).map(l => {
+      let lat = num(l.lat), lon = num(l.lon);
+      if(lat < -40 && lon > -40) [lat, lon] = [lon, lat];   // latitude e longitude trocadas
+      if(!isFinite(lat) || !isFinite(lon)){ ignorados++; return null; }
+      const cat = MEM_CAT[semAcento(l.categoria || '')] ? semAcento(l.categoria) : 'outro';
+      return {...l, lat, lon, cat, ex: /^(sim|si|x|1|yes|true)$/i.test(semAcento(l.exemplo || ''))};
+    }).filter(Boolean);
+    document.getElementById('mem-aviso').textContent = ignorados ? t('m_ignorados', {n: ignorados}) : '';
+    L_.memoria = L.featureGroup(memLugares.map((l, i) => {
+      const m = L.marker([l.lat, l.lon], {icon: L.divIcon({className:'', html:`<div class="mem-pin${l.ex ? ' ex' : ''}" style="--c:${MEM_CAT[l.cat].cor}">${glifo(l.cat)}</div>`, iconSize:[32, 32], iconAnchor:[16, 36], popupAnchor:[0, -34]}), title: memNome(l)});
+      m.bindPopup(() => memCartao(l), {className:'mem-popup', maxWidth:270, maxHeight: Math.max(240, map.getSize().y - 110), autoPanPaddingTopLeft:[56, 64], autoPanPaddingBottomRight:[12, 12]});
+      l.marker = m; return m;
+    }));
+    buildMemoria(); refreshLayers();
+    if(memLugares.length) enquadrarMemoria();
+  }).catch(() => { document.getElementById('mem-list').innerHTML = `<div class="soon-box">${t('m_err')}</div>`; });
+}
+// texto no idioma escolhido; se faltar, usa o outro idioma
+const memNome = l => (LANG === 'es' ? l.nome_es || l.nome_pt : l.nome_pt || l.nome_es) || '—';
+const memDesc = l => (LANG === 'es' ? l.descricao_es || l.descricao_pt : l.descricao_pt || l.descricao_es) || '';
+const dominio = u => { try { return new URL(u).hostname.replace(/^www\./, ''); } catch(e){ return u; } };
+// só aceita links http(s) vindos da planilha
+const linkSeguro = (u, txt) => /^https?:\/\//i.test(u) ? `<a href="${esc(u)}" target="_blank" rel="noopener">${esc(txt)}</a>` : esc(txt);
+const fotoSrc = f => /^https?:\/\//.test(f) ? f : 'data/memoria/fotos/' + encodeURIComponent(f);
+function semFoto(tam){ return `${nanduti(tam)}<span>${t('m_foto_breve')}</span>`; }
+function memCartao(l){
+  const foto = l.foto ? `<img src="${esc(fotoSrc(l.foto))}" alt="${esc(memNome(l))}" loading="lazy" onload="if(this.naturalHeight > this.naturalWidth) this.style.objectPosition = 'center 12%'" onerror="this.parentNode.innerHTML=semFoto(64)">` : semFoto(64);
+  return `<div class="mem-photo">${foto}${l.ex ? `<span class="tag-ex">${t('m_exemplo')}</span>` : ''}</div>
+    <div class="mem-body">
+      <span class="mem-chip" style="--c:${MEM_CAT[l.cat].cor}">${glifo(l.cat)} ${t('cat_' + l.cat)}</span>
+      <div class="mem-title">${esc(memNome(l))}</div>
+      ${l.ano ? `<div class="mem-ano">${esc(l.ano)}</div>` : ''}
+      ${memDesc(l) ? `<p>${esc(memDesc(l)).replace(/\n/g, '<br>')}</p>` : ''}
+      ${l.fonte ? `<div class="mem-cred">${t('m_fonte')}: ${linkSeguro(l.fonte, dominio(l.fonte))}</div>` : ''}
+      ${l.foto && l.credito_foto ? `<div class="mem-cred">${t('m_foto_de')}: ${(c => l.foto_link ? linkSeguro(l.foto_link, c) : esc(c))(l.credito_foto.replace(/Public domain/i, LANG === 'es' ? 'Dominio público' : 'Domínio público'))}</div>` : ''}
+    </div>`;
+}
+function buildMemoria(){
+  if(!memLugares) return;
+  const cats = Object.keys(MEM_CAT).filter(c => memLugares.some(l => l.cat === c));
+  if(memFiltro !== 'todos' && !cats.includes(memFiltro)) memFiltro = 'todos';
+  document.getElementById('mem-chips').innerHTML = `<button class="chip${memFiltro === 'todos' ? ' active' : ''}" data-cat="todos">${t('m_all')}</button>` +
+    cats.map(c => `<button class="chip${memFiltro === c ? ' active' : ''}" data-cat="${c}">${glifo(c, MEM_CAT[c].cor)}${t('cat_' + c)}</button>`).join('');
+  document.querySelectorAll('#mem-chips .chip').forEach(b => b.addEventListener('click', () => { memFiltro = b.dataset.cat; buildMemoria(); }));
+  const vis = memLugares.filter(l => memFiltro === 'todos' || l.cat === memFiltro);
+  memLugares.forEach(l => { const on = vis.includes(l); if(on && !L_.memoria.hasLayer(l.marker)) L_.memoria.addLayer(l.marker); if(!on) L_.memoria.removeLayer(l.marker); });
+  document.getElementById('mem-list').innerHTML = vis.length ? vis.map((l, i) => `<div class="mem-item" tabindex="0" role="button" data-i="${memLugares.indexOf(l)}">
+      <div class="mem-thumb">${l.foto ? `<img src="${esc(fotoSrc(l.foto))}" alt="" loading="lazy" onerror="this.parentNode.innerHTML=nanduti(40)">` : nanduti(40)}</div>
+      <div><div class="nm">${esc(memNome(l))}</div><div class="mt"><span style="color:${MEM_CAT[l.cat].cor}">●</span>${t('cat_' + l.cat)}${l.ano ? ' · ' + esc(l.ano) : ''}${l.ex ? ` <span class="tag-ex">${t('m_exemplo')}</span>` : ''}</div></div></div>`).join('')
+    : `<div class="soon-box">${t('m_vazio')}</div>`;
+  document.querySelectorAll('.mem-item').forEach(el => {
+    const go = () => { const l = memLugares[+el.dataset.i]; map.flyTo([l.lat, l.lon], Math.max(map.getZoom(), 16)); map.once('moveend', () => l.marker.openPopup()); };
+    el.addEventListener('click', go);
+    el.addEventListener('keydown', e => { if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); go(); } });
   });
 }
 
-function selectMunicipio(name, layer, fromList) {
-  if(selectedLayer) municipiosLayer.resetStyle(selectedLayer);
-  selectedLayer = layer;
-  layer.setStyle(selectedStyle);
-  layer.bringToFront();
-  map.fitBounds(layer.getBounds(), { padding: [40,40], maxZoom: 11 });
-  if(!fromList) layer.openPopup();
-  document.querySelectorAll('.muni-item').forEach(el => {
-    el.classList.toggle('selected', el.querySelector('.name').textContent === name);
-  });
+// ============ IDIOMA ============
+function applyLang(lang){
+  LANG = lang;
+  try { localStorage.setItem('pjc-lang', lang); } catch(e){}
+  document.documentElement.lang = lang === 'es' ? 'es' : 'pt-BR';
+  document.querySelectorAll('[data-i18n]').forEach(el => el.innerHTML = t(el.dataset.i18n));
+  const ld = document.getElementById('loading'); if(ld.style.display !== 'none' && !ld.dataset.err) ld.innerHTML = `<div class="box">${nanduti(84, 'spin')}<span>${t('loading')}</span></div>`;
+  document.querySelectorAll('[data-i18n-ph]').forEach(el => el.placeholder = t(el.dataset.i18nPh));
+  document.querySelectorAll('.lang button').forEach(b => b.classList.toggle('active', b.dataset.lang === lang));
+  document.querySelectorAll('#basemap-toggle button').forEach(b => b.classList.toggle('active', b.dataset.base === currentBase));
+  fillSwipeBoxes(); updateSwipeTags(); buildCostumes();
+  map.closePopup();
+  if(L_.territorios){
+    document.getElementById('g-lead').innerHTML = t('g_lead', {km: fmt1(kmUrb) + ' km'});
+    buildLayerList(); buildCompare(); renderList();
+  }
+  textosTempo();
+  buildMemoria();
 }
-
-document.getElementById('clear-selection').addEventListener('click', () => {
-  if(selectedLayer) { municipiosLayer.resetStyle(selectedLayer); selectedLayer = null; }
-  document.querySelectorAll('.muni-item').forEach(el => el.classList.remove('selected'));
-  document.getElementById('search').value = '';
-  renderMuniList(allMuniFeatures);
-  if(limiteLayer) map.fitBounds(limiteLayer.getBounds(), { padding: [20,20] });
-});
-
-document.getElementById('search').addEventListener('input', (e) => {
-  const q = e.target.value.trim().toLowerCase();
-  const filtered = q ? allMuniFeatures.filter(f => f.properties.NAME_2.toLowerCase().includes(q)) : allMuniFeatures;
-  renderMuniList(filtered);
-});
+document.querySelectorAll('.lang button').forEach(b => b.addEventListener('click', () => applyLang(b.dataset.lang)));
+applyLang(LANG);   // textos já aparecem antes de os dados carregarem
 </script>
 </body>
 </html>

@@ -1,0 +1,3 @@
+Coloque aqui as fotos dos lugares de memória (formato .jpg ou .webp).
+Na planilha lugares.csv, escreva só o nome do arquivo na coluna "foto" (ex.: praca-1998.jpg).
+Dica: use fotos com cerca de 1200 px de largura e até 300 KB, para o site abrir rápido.

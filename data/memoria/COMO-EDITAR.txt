@@ -1,0 +1,79 @@
+COMO ACRESCENTAR LUGARES DE MEMÓRIA NO GEOPORTAL
+=================================================
+
+Os lugares da aba "Memória" vêm da planilha lugares.csv (nesta pasta).
+Você só edita essa planilha e coloca as fotos na pasta "fotos". Não precisa mexer no código.
+
+
+1. ABRIR A PLANILHA
+-------------------
+Use um destes programas:
+  • Excel: abra o lugares.csv direto (duplo clique).
+  • Google Planilhas: Arquivo > Importar > Fazer upload > lugares.csv.
+  • LibreOffice Calc: abra o arquivo e escolha "ponto e vírgula" como separador.
+
+Cada LINHA é um lugar. Cada COLUNA é uma informação.
+
+
+2. O QUE VAI EM CADA COLUNA
+---------------------------
+  nome_pt        Nome do lugar em português.           Ex.: Monumento das Cuias
+  nome_es        Nome do lugar em espanhol.            Ex.: Monumento de las Cuias
+  categoria      Uma destas palavras (sem acento):
+                   historia | marco | natureza | fe | movimento | memoria
+                   (também valem: infancia | praca | feira | escola | igreja | outro)
+  descricao_pt   O que é o lugar, em português (até 3 frases). Só fatos com fonte.
+  descricao_es   O mesmo texto em espanhol.
+  ano            Ano ou período. Ex.: 1870   ou   anos 1970   ou   c. 1800
+  foto           Nome do arquivo da foto (ex.: praca.jpg) ou um link https://...
+  credito_foto   Autor e licença da foto. Ex.: Mirian Niz   ou   Cmasi · CC0 · Wikimedia Commons
+  foto_link      OPCIONAL. Link da página da foto (ex.: no Wikimedia Commons).
+  fonte          OPCIONAL. Link de onde veio a informação do texto.
+  lat            Latitude.  Ex.: -22.5405
+  lon            Longitude. Ex.: -55.7290
+  exemplo        Escreva "sim" só em pontos provisórios. Nos lugares reais, deixe vazio.
+
+Dicas:
+  • Se você escrever só em um idioma, o site mostra esse texto nos dois idiomas.
+  • Pode usar vírgula ou ponto nos números (-22,5405 ou -22.5405). O site entende os dois.
+  • Se trocar latitude e longitude sem querer, o site corrige sozinho.
+
+
+3. COMO PEGAR AS COORDENADAS (lat e lon)
+----------------------------------------
+  • Google Maps: clique com o botão direito no lugar. O primeiro item do menu
+    mostra os dois números (ex.: -22.5405, -55.7290). O 1º é a lat, o 2º é a lon.
+  • QGIS: use o botão "Capturar coordenadas" (em EPSG:4326 / WGS 84).
+
+
+4. FOTOS
+--------
+  • Coloque a foto na pasta "fotos" (ao lado desta planilha).
+  • Na coluna "foto", escreva só o nome do arquivo, igualzinho (ex.: praca-1998.jpg).
+  • Use fotos com cerca de 1200 px de largura e até 300 KB, para o site abrir rápido.
+    (No Windows: abra a foto no app Fotos > "..." > Redimensionar imagem.)
+  • Use só fotos suas, com autorização, ou de licença livre — e preencha o crédito.
+    Fotos de notícias ou redes sociais têm dono: não use sem permissão.
+  • Fotos livres: procure em https://commons.wikimedia.org (o crédito e a licença
+    aparecem na página de cada foto).
+  • Sem foto, o cartão mostra o desenho do ñandutí com "Foto em breve".
+    Hoje todos os lugares têm foto.
+    Quando tiver uma foto, é só preencher a coluna "foto".
+
+
+
+
+5. SALVAR (MUITO IMPORTANTE)
+----------------------------
+  • Excel: Arquivo > Salvar como > tipo "CSV UTF-8 (Delimitado por vírgulas)".
+    (Não use o tipo "CSV" comum: ele estraga os acentos, como ç, ã e ñ.)
+  • Google Planilhas: Arquivo > Fazer download > Valores separados por vírgula (.csv).
+    Depois troque o arquivo antigo por esse, com o mesmo nome: lugares.csv
+  • Mantenha a primeira linha (os nomes das colunas) sem alterar.
+
+
+6. CONFERIR E PUBLICAR
+----------------------
+  Depois de salvar, peça ao Claude Code: "atualizei os lugares de memória, confere e publica".
+  Ele testa o site, mostra como ficou e só publica com a sua aprovação.
+  Se alguma linha estiver sem coordenadas, a aba Memória avisa quantas foram ignoradas.
