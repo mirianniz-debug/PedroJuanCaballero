@@ -264,11 +264,26 @@
   ::-webkit-scrollbar{width:8px;} ::-webkit-scrollbar-thumb{background:var(--line-strong);border-radius:4px;}
   :focus-visible{outline:2px solid var(--clay);outline-offset:2px;}
 
+  /* fechar das caixas "Como usar?" e "Fonte de dados" */
+  .info-box{position:relative;}
+  .ib-close{position:absolute;top:6px;right:8px;border:none;background:none;color:var(--header-text);font-size:20px;line-height:1;cursor:pointer;padding:4px 6px;opacity:.8;}
+  .info-box > div{padding-right:18px;}
+  #sheet-handle{display:none;}
+
   @media (max-width:820px){
+    /* celular: mapa em tela cheia + painel que recolhe embaixo */
     #app{flex-direction:column;}
-    #map{height:52%;flex:none;}
-    #panel{width:100%;min-width:0;flex:1;height:auto;border-left:none;border-top:1px solid var(--line-strong);}
-    #panel-header{padding:12px 16px 10px;}
+    #map{flex:1;height:auto;min-height:0;}
+    #panel{width:100%;min-width:0;flex:none;height:72dvh;border-left:none;border-top:1px solid var(--line-strong);border-radius:16px 16px 0 0;box-shadow:0 -6px 22px rgba(0,0,0,.28);position:relative;z-index:1000;}
+    body.sheet-min #panel{height:auto;}
+    body.sheet-min #panel-body, body.sheet-min #map-credit{display:none;}
+    #sheet-handle{display:flex;flex-direction:column;align-items:center;gap:3px;width:100%;border:none;background:var(--header-bg);color:var(--header-text);padding:7px 0 3px;font:600 11px var(--font-body);cursor:pointer;border-radius:16px 16px 0 0;opacity:.95;}
+    #sheet-handle .grip{width:40px;height:4px;border-radius:3px;background:var(--header-text);opacity:.45;}
+    #panel-header{padding:6px 16px 10px;}
+    .tab-btn{padding:10px 2px;font-size:12px;}
+    /* "Como usar?" e "Fonte de dados" viram uma janela inteira */
+    #panel-header > .info-box{position:fixed;inset:12px;z-index:3000;max-height:none;margin:0;background:var(--header-bg);color:var(--header-text);padding:18px 18px 14px;font-size:13.5px;box-shadow:0 10px 40px rgba(0,0,0,.5);overflow:auto;-webkit-overflow-scrolling:touch;}
+    .ib-close{position:sticky;top:0;float:right;font-size:26px;margin:-8px -8px 0 0;background:var(--header-bg);border-radius:50%;}
     #site-logo{width:34px;height:34px;}
     #panel-header h1{font-size:16px;}
     #panel-body{padding:14px 16px 20px;}
@@ -314,6 +329,8 @@
   </div>
 
   <aside id="panel">
+    <!-- alça do painel no celular: abre e recolhe -->
+    <button id="sheet-handle" aria-expanded="false"><span class="grip" aria-hidden="true"></span><span class="lbl"></span></button>
     <header id="panel-header">
       <div id="logo-row">
         <svg id="site-logo" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Logo Mirian Niz">
@@ -334,8 +351,8 @@
           <button data-lang="es" title="Español">ES</button>
         </div>
       </div>
-      <div id="help-box" class="info-box" data-i18n="help_html"></div>
-      <div id="source-box" class="info-box" data-i18n="src_html"></div>
+      <div id="help-box" class="info-box" role="dialog"><button class="ib-close" aria-label="×">×</button><div data-i18n="help_html"></div></div>
+      <div id="source-box" class="info-box" role="dialog"><button class="ib-close" aria-label="×">×</button><div data-i18n="src_html"></div></div>
     </header>
 
     <nav id="tabs" role="tablist">
@@ -441,7 +458,7 @@
 const T = {
 pt: {
   loading:'Carregando…', err:'Erro ao carregar dados: ',
-  sub:'Uma cidade, dois países', help_btn:'Como usar?', src_btn:'Fonte de dados',
+  sub:'Uma cidade, dois países', help_btn:'Como usar?', src_btn:'Fonte de dados', sheet_open:'Abrir painel ▲', sheet_close:'Ver o mapa ▼',
   base_sat:'Satélite', base_ruas:'Ruas', ruas_nome:'Ruas (OpenStreetMap)',
   help_html:`<p><b>Capítulos:</b> use as abas abaixo para navegar pela história da cidade.</p>
     <p><b>Camadas:</b> marque ou desmarque cada camada na lista. As cores da lista são a legenda do mapa.</p>
@@ -524,7 +541,7 @@ pt: {
 },
 es: {
   loading:'Cargando…', err:'Error al cargar datos: ',
-  sub:'Una ciudad, dos países', help_btn:'¿Cómo usar?', src_btn:'Fuente de datos',
+  sub:'Una ciudad, dos países', help_btn:'¿Cómo usar?', src_btn:'Fuente de datos', sheet_open:'Abrir panel ▲', sheet_close:'Ver el mapa ▼',
   base_sat:'Satélite', base_ruas:'Calles', ruas_nome:'Calles (OpenStreetMap)',
   help_html:`<p><b>Capítulos:</b> use las pestañas para recorrer la historia de la ciudad.</p>
     <p><b>Capas:</b> marque o desmarque cada capa en la lista. Los colores de la lista son la leyenda del mapa.</p>
@@ -735,7 +752,24 @@ function setBase(key){
 
 // ============ ABAS E CAIXAS DE AJUDA ============
 let activeTab = 'gemea';
+
+// ---- painel recolhível no celular ----
+const ehCelular = () => matchMedia('(max-width:820px)').matches;
+function setSheet(aberto){
+  document.body.classList.toggle('sheet-min', !aberto);
+  const h = document.getElementById('sheet-handle');
+  h.setAttribute('aria-expanded', String(aberto));
+  h.querySelector('.lbl').textContent = aberto ? t('sheet_close') : t('sheet_open');
+  requestAnimationFrame(() => map.invalidateSize());   // o mapa muda de tamanho
+}
+const sheetAberto = () => !document.body.classList.contains('sheet-min');
+// no celular, recolhe o painel para mostrar o resultado no mapa
+const mostrarMapa = () => { if(ehCelular()) setSheet(false); };
+document.getElementById('sheet-handle').addEventListener('click', () => setSheet(!sheetAberto()));
+if(ehCelular()) document.body.classList.add('sheet-min');
+
 document.querySelectorAll('.tab-btn').forEach(btn => btn.addEventListener('click', () => {
+  if(ehCelular() && !sheetAberto()) setSheet(true);
   if(btn.dataset.tab === activeTab) return;
   activeTab = btn.dataset.tab;
   desligarCortina();   // a cortina de uma aba não continua na outra
@@ -751,8 +785,14 @@ document.querySelectorAll('.mini-btn[data-box]').forEach(btn => btn.addEventList
   const open = !box.classList.contains('show');
   document.querySelectorAll('.info-box').forEach(b => b.classList.remove('show'));
   document.querySelectorAll('.mini-btn[data-box]').forEach(b => b.setAttribute('aria-expanded', 'false'));
-  if(open){ box.classList.add('show'); btn.setAttribute('aria-expanded', 'true'); }
+  if(open){ box.classList.add('show'); btn.setAttribute('aria-expanded', 'true'); box.scrollTop = 0; box.querySelector('.ib-close').focus(); }
 }));
+function fecharCaixas(){
+  document.querySelectorAll('.info-box').forEach(b => b.classList.remove('show'));
+  document.querySelectorAll('.mini-btn[data-box]').forEach(b => b.setAttribute('aria-expanded', 'false'));
+}
+document.querySelectorAll('.ib-close').forEach(b => b.addEventListener('click', fecharCaixas));
+document.addEventListener('keydown', e => { if(e.key === 'Escape') fecharCaixas(); });
 
 // tema claro/escuro (lembra a escolha só neste navegador)
 try { const th = localStorage.getItem('pjc-tema'); if(th) document.documentElement.dataset.theme = th; } catch(e){}
@@ -959,8 +999,8 @@ function buildCompare(){
   document.getElementById('compare').innerHTML = html;
 }
 
-document.getElementById('go-border').addEventListener('click', () => L_.fronteiraUrbBounds && map.flyToBounds(L_.fronteiraUrbBounds, {padding:[30,30]}));
-document.getElementById('go-region').addEventListener('click', () => L_.territorios && map.flyToBounds(L_.territorios.getBounds(), {padding:[20,20]}));
+document.getElementById('go-border').addEventListener('click', () => { mostrarMapa(); L_.fronteiraUrbBounds && map.flyToBounds(L_.fronteiraUrbBounds, {padding:[30,30]}); });
+document.getElementById('go-region').addEventListener('click', () => { mostrarMapa(); L_.territorios && map.flyToBounds(L_.territorios.getBounds(), {padding:[20,20]}); });
 
 // ============ LISTA DE TERRITÓRIOS ============
 let selected = null;
@@ -980,6 +1020,7 @@ function renderList(){
   });
 }
 function selectTerritorio(nome){
+  mostrarMapa();
   selected = nome;
   if(!layerOn.territorios){ layerOn.territorios = true; document.querySelector('[data-layer="territorios"]').checked = true; refreshLayers(); }
   L_.territorios.eachLayer(l => {
@@ -1049,7 +1090,7 @@ document.querySelectorAll('.swipe-box').forEach(box => {
     const l = box.querySelector('.sw-l').value, r = box.querySelector('.sw-r').value;
     if(l === r) return alert(t('sw_same'));
     if(activeTab === 'tempo'){ manchaOn = false; document.getElementById('mancha-on').checked = false; refreshLayers(); }
-    setBase(l); swipeX = .5; setSwipe(r);
+    mostrarMapa(); setBase(l); swipeX = .5; setSwipe(r);
   });
   box.querySelector('.sw-off').addEventListener('click', desligarCortina);
 });
@@ -1291,7 +1332,7 @@ function buildMemoria(){
       <div><div class="nm">${esc(memNome(l))}</div><div class="mt"><span style="color:${MEM_CAT[l.cat].cor}">●</span>${t('cat_' + l.cat)}${l.ano ? ' · ' + esc(l.ano) : ''}${l.ex ? ` <span class="tag-ex">${t('m_exemplo')}</span>` : ''}</div></div></div>`).join('')
     : `<div class="soon-box">${t('m_vazio')}</div>`;
   document.querySelectorAll('.mem-item').forEach(el => {
-    const go = () => { const l = memLugares[+el.dataset.i]; map.flyTo([l.lat, l.lon], Math.max(map.getZoom(), 16)); map.once('moveend', () => l.marker.openPopup()); };
+    const go = () => { mostrarMapa(); const l = memLugares[+el.dataset.i]; map.flyTo([l.lat, l.lon], Math.max(map.getZoom(), 16)); map.once('moveend', () => l.marker.openPopup()); };
     el.addEventListener('click', go);
     el.addEventListener('keydown', e => { if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); go(); } });
   });
@@ -1307,7 +1348,7 @@ function applyLang(lang){
   document.querySelectorAll('[data-i18n-ph]').forEach(el => el.placeholder = t(el.dataset.i18nPh));
   document.querySelectorAll('.lang button').forEach(b => b.classList.toggle('active', b.dataset.lang === lang));
   document.querySelectorAll('#basemap-toggle button').forEach(b => b.classList.toggle('active', b.dataset.base === currentBase));
-  fillSwipeBoxes(); updateSwipeTags(); buildCostumes();
+  fillSwipeBoxes(); updateSwipeTags(); buildCostumes(); setSheet(sheetAberto());
   map.closePopup();
   if(L_.territorios){
     document.getElementById('g-lead').innerHTML = t('g_lead', {km: fmt1(kmUrb) + ' km'});
